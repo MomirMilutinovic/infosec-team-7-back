@@ -6,6 +6,7 @@ import com.lunark.lunark.auth.dto.AccountUpdatePasswordDto;
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
 import com.lunark.lunark.auth.service.IAccountService;
+import com.lunark.lunark.auth.service.ICertificateRequestService;
 import com.lunark.lunark.auth.service.IVerificationService;
 import com.lunark.lunark.mapper.AccountDtoMapper;
 import com.lunark.lunark.mapper.PropertyDtoMapper;
@@ -39,6 +40,9 @@ public class AccountController {
 
     @Autowired
     IVerificationService verificationService;
+
+    @Autowired
+    ICertificateRequestService certificateRequestService;
 
     @Autowired
     IPropertyService propertyService;
@@ -105,6 +109,19 @@ public class AccountController {
         accountService.update(account);
         return new ResponseEntity<>(modelMapper.map(account, AccountDto.class), HttpStatus.OK);
     }
+
+    @PostMapping(value = "/create-certificate")
+    @PreAuthorize("hasAuthority('HOST') or hasAuthority('ADMIN')")
+    public ResponseEntity createCertificationRequest(@RequestBody AccountSignUpDto accountDto) {
+        Optional<Account> accountOptional = accountService.find(accountDto.getId());
+        if(accountOptional.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Account account = accountDto.toAccount();
+        certificateRequestService.create(account);
+        return new ResponseEntity<>(null, HttpStatus.CREATED);
+    }
+
 
 
     @PutMapping("/update-password")
@@ -206,4 +223,8 @@ public class AccountController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+
+
+
 }
