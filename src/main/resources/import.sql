@@ -20,6 +20,8 @@ INSERT INTO account (email, password, name, surname, address, phone_number, veri
 -- Password: password6
 INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('user7@example.com', '$2a$10$GdwvPv72sNBVe.4QhUY7/OdLzRb8RH8Oo4/LR8nWF7NW83/CM4oPy', 'Chloe', 'Baker', '567 Hail St', '9990001111', true, 1, false);
 
+INSERT INTO pki_account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('pkiadmin@pki.com', '$2a$10$FJ.cj9UfVwXVnmNACr/9QOFZ.MKtTjVNBMUI8d7rWr.D18qoss1v.', 'SUPER', 'ADMIN', '123 Sky St', '1112233444', true, 0, false);
+
 -- Review imports
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (5, 'Great host!', true, '2023-01-10T12:30:00', 0, 1);
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (5, 'Amazing property!', true, '2023-02-15T15:45:00', 1, 4);
