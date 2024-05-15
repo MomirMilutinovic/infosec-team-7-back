@@ -87,7 +87,6 @@ public class WebSecurityConfiguration {
         http.securityContext((securityContext) -> securityContext
                 .securityContextRepository(new RequestAttributeSecurityContextRepository())
         );
-
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(tokenEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

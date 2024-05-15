@@ -1,5 +1,7 @@
 package com.lunark.lunark.util;
 
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.service.AccountService;
 import io.jsonwebtoken.Claims;
@@ -11,6 +13,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.function.Function;
 
@@ -33,17 +38,40 @@ public class TokenUtils {
 
     private AccountService accountService;
 
+    private final PublicKey publicKey;
+
+    public TokenUtils(@Value("${token-utils.public-key}") String publicKeyEncoded) {
+        this.publicKey = getKey(publicKeyEncoded);
+    }
+
+    public static PublicKey getKey(String key){
+        try{
+            byte[] byteKey = Base64.getDecoder().decode(key);
+            X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+
+            return kf.generatePublic(X509publicKey);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
     public<T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
+
+        return Jwts.parser().setSigningKey(this.publicKey).parseClaimsJws(token).getBody();
     }
 
     public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+        return getClaimFromToken(token, claims -> claims.get("preferred_username", String.class));
     }
 
     public String getAudienceFromToken(String token) {

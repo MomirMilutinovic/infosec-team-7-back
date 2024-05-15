@@ -43,7 +43,6 @@ public class TokenFilter extends OncePerRequestFilter {
     public TokenBasedAuth setAuthentication(String authToken) {
         String username;
         try {
-
             if (authToken != null) {
                 username = tokenUtil.getUsernameFromToken(authToken);
                 if (username != null) {
