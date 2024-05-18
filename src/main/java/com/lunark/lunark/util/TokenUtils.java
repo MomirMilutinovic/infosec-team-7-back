@@ -1,7 +1,5 @@
 package com.lunark.lunark.util;
 
-import com.auth0.jwk.JwkProvider;
-import com.auth0.jwk.UrlJwkProvider;
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.service.AccountService;
 import io.jsonwebtoken.Claims;
@@ -12,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -41,10 +38,10 @@ public class TokenUtils {
     private final PublicKey publicKey;
 
     public TokenUtils(@Value("${token-utils.public-key}") String publicKeyEncoded) {
-        this.publicKey = getKey(publicKeyEncoded);
+        this.publicKey = parseKey(publicKeyEncoded);
     }
 
-    public static PublicKey getKey(String key){
+    public static PublicKey parseKey(String key){
         try{
             byte[] byteKey = Base64.getDecoder().decode(key);
             X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
