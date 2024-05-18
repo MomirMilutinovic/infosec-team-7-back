@@ -1,10 +1,7 @@
 package com.lunark.lunark.configuration;
 
+import com.lunark.lunark.security.KeycloakJwtAuthConverter;
 import com.lunark.lunark.security.TokenBasedAuth;
-import com.lunark.lunark.security.TokenFilter;
-import com.lunark.lunark.util.TokenUtils;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -17,9 +14,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -28,11 +22,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
-    private final TokenFilter tokenFilter;
+    private final KeycloakJwtAuthConverter keycloakJwtAuthConverter;
 
     @Autowired
-    public WebSocketConfiguration(TokenFilter tokenFilter) {
-        this.tokenFilter = tokenFilter;
+    public WebSocketConfiguration(KeycloakJwtAuthConverter keycloakJwtAuthConverter) {
+        this.keycloakJwtAuthConverter = keycloakJwtAuthConverter;
     }
 
     @Override
@@ -64,9 +58,8 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
                     assert authorizationHeader != null;
                     String authToken = authorizationHeader.substring(7);
 
-                    TokenBasedAuth authentication = tokenFilter.setAuthentication(authToken);
+                    TokenBasedAuth authentication = keycloakJwtAuthConverter.getAuthentication(authToken);
                     accessor.setUser(authentication);
-
                 }
                 return message;
             }

@@ -30,7 +30,7 @@ public class KeycloakJwtAuthConverter implements Converter<Jwt, TokenBasedAuth> 
     private static final String GROUPS = "groups";
     private static final String REALM_ACCESS_CLAIM = "realm_access";
     private static final String ROLES_CLAIM = "roles";
-    private static final Logger logger = LoggerFactory.getLogger(TokenFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(KeycloakJwtAuthConverter.class);
     private final UserDetailsService userDetailsService;
     private final TokenUtils tokenUtils;
 
