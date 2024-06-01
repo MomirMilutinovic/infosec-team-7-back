@@ -10,6 +10,7 @@ import com.lunark.lunark.moderation.model.AccountReport;
 import com.lunark.lunark.moderation.service.IAccountReportService;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -80,7 +82,7 @@ public class AccountReportController {
 
     @GetMapping(value = "/host-report-eligibility/{hostId}")
     @PreAuthorize("hasAuthority('GUEST')")
-    public ResponseEntity<HostReportEligibilityDto> isCurrentGuestEligibleToReport(@PathVariable("hostId") @PositiveOrZero Long hostId) {
+    public ResponseEntity<HostReportEligibilityDto> isCurrentGuestEligibleToReport(@PathVariable("hostId") @NotNull UUID hostId) {
         Account reporter = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean eligible = accountReportService.isGuestEligibleToReport(reporter, hostId);
         return new ResponseEntity<>(new HostReportEligibilityDto(hostId, eligible), HttpStatus.OK);

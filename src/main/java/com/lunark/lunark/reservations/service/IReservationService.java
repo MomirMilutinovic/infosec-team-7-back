@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IReservationService {
     Reservation create(ReservationRequestDto reservation, String username);
@@ -19,11 +20,11 @@ public interface IReservationService {
 
     List<Reservation> getAllReservationsForPropertiesList(List<Property> propertiesList);
 
-    List<Reservation> getAllReservationsForUser(Long userId);
+    List<Reservation> getAllReservationsForUser(UUID userId);
     List<Reservation> findByFilter(ReservationSearchDto dto, boolean isHost);
 
-    public List<Reservation> getIncomingReservationsForHostId(Long hostId);
-    public List<Reservation> getAllAcceptedReservations(Long guestId);
+    public List<Reservation> getIncomingReservationsForHostId(UUID hostId);
+    public List<Reservation> getAllAcceptedReservations(UUID guestId);
 
     void save(Reservation reservation);
 
@@ -32,7 +33,7 @@ public interface IReservationService {
     void acceptOrRejectReservation(Reservation reservation, ReservationStatus isAccepted);
 
     boolean cancelReservation(Reservation reservation);
-    void deleteReservation(Long reservationId, Long accountId);
+    void deleteReservation(Long reservationId, UUID accountId);
 
     void rejectAllPendingReservationsAtPropertyThatContainDate(Long propertyId, LocalDate date);
 

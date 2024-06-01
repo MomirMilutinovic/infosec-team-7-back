@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AccountReportService implements IAccountReportService {
@@ -63,7 +64,7 @@ public class AccountReportService implements IAccountReportService {
     }
 
     @Override
-    public boolean isGuestEligibleToReport(Account guest, Long hostId) {
+    public boolean isGuestEligibleToReport(Account guest, UUID hostId) {
         if (accountService.find(hostId).isEmpty()) {
             throw new AccountNotFoundException("Could not find host with given id");
         }
@@ -74,7 +75,7 @@ public class AccountReportService implements IAccountReportService {
     }
 
     @Override
-    public void block(Long id) {
+    public void block(UUID id) {
         Optional<Account> optionalAccount = accountService.find(id);
         if(optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
@@ -87,7 +88,7 @@ public class AccountReportService implements IAccountReportService {
     }
 
     private void blockAccount(Account account) {
-        account.setBlocked(true);
+        // TODO: Block account in ldap or keycloak
         accountService.saveAndFlush(account);
     }
 

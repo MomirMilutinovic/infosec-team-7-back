@@ -5,6 +5,7 @@ import com.lunark.lunark.moderation.model.AccountReport;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IAccountReportService {
     Optional<AccountReport> getById(Long id);
@@ -12,7 +13,7 @@ public interface IAccountReportService {
 
     AccountReport create(AccountReport report);
 
-    boolean isGuestEligibleToReport(Account guest, Long hostId);
+    boolean isGuestEligibleToReport(Account guest, UUID hostId);
 
-    void block(Long id);
+    void block(UUID id);
 }

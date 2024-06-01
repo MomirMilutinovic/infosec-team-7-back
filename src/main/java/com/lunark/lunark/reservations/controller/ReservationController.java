@@ -23,11 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -51,12 +48,6 @@ public class ReservationController {
         ReservationResponseDto response = modelMapper.map(reservation, ReservationResponseDto.class);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-
-    @GetMapping(path = "/{reservation_id}")
-    public ResponseEntity<ReservationDto> getReservation(@RequestHeader("x-access-token") String token, @PathVariable("reservation_id") Long Id) {
-        ReservationDto reservationDto = new ReservationDto(2L, 1L, "Vila Golija", LocalDate.of(2024, 6, 14), LocalDate.of(2023, 6, 16), 9959, 1L, 3, "pending", 0);
-        return new ResponseEntity<>(reservationDto, HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/{id}")
@@ -105,17 +96,9 @@ public class ReservationController {
         return ResponseEntity.ok(ReservationDtoMapper.fromReservationToDto(reservation.get()));
     }
 
-    @GetMapping(value="")
-    public ResponseEntity<Collection<ReservationDto>> getReservations(@RequestHeader("x-access-token") String token, @RequestParam(value = "propertyName", required = false) String propertyName, @RequestParam(value = "date", required = false) LocalDate date, @RequestParam(value = "status", required = false) String status){
-        ArrayList<ReservationDto> reservationDtos = new ArrayList<>();
-        reservationDtos.add(new ReservationDto(1L, 2L, "Hotel Oderberger", LocalDate.of(2024, 7, 14), LocalDate.of(2023, 7, 16), 15000, 1L, 1, "canceled", 1));
-
-        return new ResponseEntity<>(reservationDtos, HttpStatus.OK);
-    }
-
     @GetMapping(value="/incoming-reservations", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('HOST')")
-    public ResponseEntity<List<ReservationDto>> getIncomingReservations(@RequestParam("hostId") Long hostId) {
+    public ResponseEntity<List<ReservationDto>> getIncomingReservations(@RequestParam("hostId") UUID hostId) {
         List<Reservation> reservations = reservationService.getIncomingReservationsForHostId(hostId).stream().filter(reservation -> ReservationStatus.PENDING.equals(reservation.getStatus())).toList();
         if(reservations.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -126,7 +109,7 @@ public class ReservationController {
 
     @GetMapping(value="/accepted-reservations", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('GUEST')")
-    public ResponseEntity<List<ReservationDto>> getAcceptedReservations(@RequestParam("guestId") Long guestId) {
+    public ResponseEntity<List<ReservationDto>> getAcceptedReservations(@RequestParam("guestId") UUID guestId) {
         List<Reservation> reservations = reservationService.getAllAcceptedReservations(guestId);
         if(reservations.isEmpty()) { return new ResponseEntity<>(HttpStatus.NOT_FOUND); }
         List<ReservationDto> reservationDtos = reservations.stream().map(ReservationDtoMapper::fromReservationToDto) .toList();

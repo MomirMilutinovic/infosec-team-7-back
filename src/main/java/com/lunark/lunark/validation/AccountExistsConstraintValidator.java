@@ -12,10 +12,11 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Configurable(autowire = Autowire.BY_TYPE, dependencyCheck = true)
 @Component
-public class AccountExistsConstraintValidator implements ConstraintValidator<AccountExistsConstraint, Long> {
+public class AccountExistsConstraintValidator implements ConstraintValidator<AccountExistsConstraint, UUID> {
     @Autowired
     IAccountService accountService;
 
@@ -25,7 +26,7 @@ public class AccountExistsConstraintValidator implements ConstraintValidator<Acc
     }
 
     @Override
-    public boolean isValid(Long id, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(UUID id, ConstraintValidatorContext constraintValidatorContext) {
         Optional<Account> account = accountService.find(id);
         if (account.isEmpty()) {
             return false;

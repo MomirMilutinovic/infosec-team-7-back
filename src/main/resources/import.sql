@@ -1,24 +1,15 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Account imports
---Password: password1
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('user1@example.com', '$2a$10$FJ.cj9UfVwXVnmNACr/9QOFZ.MKtTjVNBMUI8d7rWr.D18qoss1v.', 'Alex', 'Johnson', '123 Sky St', '1112233444', true, 0, false);
---Password: password2
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('user2@example.com', '$2a$10$EAdnVLmcYbL5o66p2tD8..ultVcZF69/nC64U4kzv/kxOkPozOnOa', 'Sophia', 'Brown', '456 Cloud St', '9876654321', true, 1, false);
---Password: adminpassword1
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('admin@example.com', '$2a$10$/w0fts1.JZZIvHhVzFaqWuj5WYyYpr241Tmf4dWgs/hA6xO9FHfi.', 'William', 'Smith', '789 Sun St', '5556667777', true, 2, false);
---Password: adminpassword2
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('admin2@example.com', '$2a$10$/y782IN1T9t8lR2uKHEmJe9YIOQb5UDWOsS13iM5FCGgbizirMSYW', 'Emma', 'Jones', '890 Rain St', '3332221111', true, 0, false);
---Password: blockedpassword
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('blockeduser@example.com', '$2a$10$OrSpGDiqLsDxpNoC.Nn4.OiRdeUJ4DjJ1F1Q00WkT4wzzTxegUDPC', 'Oliver', 'Williams', '567 Wind St', '9993334444', true, 0, false);
---Password: unverifiedpassword
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('verifieduser2@example.com', '$2a$10$O7Ti/V9/EWr6IKLFy1V4Fehsk2slEEuHoJ3pIEFxT6ab8Zr1muVWe', 'Ava', 'Davis', '321 Thunder St', '4449998888', false, 0, false);
---Password: password3
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('user3@example.com', '$2a$10$n/tcwPNGRI4Aanvz5CJp2.pvvOFJncDxHLT2OjDy2gqQ5QXRwUONG', 'Liam', 'Martin', '789 Lightning St', '7771112222', true, 0, false);
---Password: password4
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('user4@example.com', '$2a$10$1wwMVoNmv.Qsy9p9WYC5xO4gswAzc7w7V9FT3x6FfAtl0Hicv0N2q', 'Grace', 'Miller', '234 Storm St', '5556667777', true, 0, false);
---Password: password5
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('user5@example.com', '$2a$10$OrHomTrY.lEfFDlkwK/tPeKrjMXyy/R.nefcbfpgcxrI03WvoGkIu', 'Daniel', 'Cooper', '876 Rainbow St', '2223334444', true, 2, false);
--- Password: password6
-INSERT INTO account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('user7@example.com', '$2a$10$GdwvPv72sNBVe.4QhUY7/OdLzRb8RH8Oo4/LR8nWF7NW83/CM4oPy', 'Chloe', 'Baker', '567 Hail St', '9990001111', true, 1, false);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'user1@example.com', 'Alex', 'Johnson', '123 Sky St', '1112233444', 0);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'user2@example.com', 'Sophia', 'Brown', '456 Cloud St', '9876654321', 1);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'admin@example.com', 'William', 'Smith', '789 Sun St', '5556667777', 2);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'admin2@example.com', 'Emma', 'Jones', '890 Rain St', '3332221111', 0);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'blockeduser@example.com', 'Oliver', 'Williams', '567 Wind St', '9993334444', 0);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'verifieduser2@example.com', 'Ava', 'Davis', '321 Thunder St', '4449998888', 0);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'user3@example.com', 'Liam', 'Martin', '789 Lightning St', '7771112222', 0);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'user4@example.com', 'Grace', 'Miller', '234 Storm St', '5556667777', 0);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'user5@example.com', 'Daniel', 'Cooper', '876 Rainbow St', '2223334444', 2);
+INSERT INTO account (id, email, name, surname, address, phone_number, role) VALUES (uuid_generate_v4(), 'user7@example.com',uuid_generate_v4(),  'Chloe', 'Baker', '567 Hail St', '9990001111', 1);
 
 INSERT INTO pki_account (email, password, name, surname, address, phone_number, verified, role, blocked) VALUES ('pkiadmin@pki.com', '$2a$10$FJ.cj9UfVwXVnmNACr/9QOFZ.MKtTjVNBMUI8d7rWr.D18qoss1v.', 'SUPER', 'ADMIN', '123 Sky St', '1112233444', true, 0, false);
 

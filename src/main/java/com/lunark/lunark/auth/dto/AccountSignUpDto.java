@@ -11,10 +11,10 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.UUID;
 
 public class AccountSignUpDto {
-    @PositiveOrZero(message = "Ids cannot be negative")
-    private Long id;
+    private UUID id;
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "The entered email must be a valid email")
     private String email;
@@ -118,17 +118,17 @@ public class AccountSignUpDto {
         this.role = role;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
     public Account toAccount() {
         AccountRole accountRole = AccountRole.fromString(this.role);
 
-        return new Account(null, email, password, name, surname, address, phoneNumber, false, accountRole, false, false, new ArrayList<>(), new HashSet<>());
+        return new Account(id, email, name, surname, address, phoneNumber, false, accountRole, false, new ArrayList<>(), new HashSet<>());
     }
 }

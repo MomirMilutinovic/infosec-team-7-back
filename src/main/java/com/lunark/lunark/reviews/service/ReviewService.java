@@ -19,6 +19,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ReviewService implements IReviewService<Review> {
@@ -68,7 +69,7 @@ public class ReviewService implements IReviewService<Review> {
     }
 
     @Override
-    public Review createHostReview(Review review, Long hostId) {
+    public Review createHostReview(Review review, UUID hostId) {
         Account host = this.accountService.find(hostId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Host not found"));
         if (!this.guestEligibleToReviewHost(review.getAuthor().getId(), hostId)) {
             throw new RuntimeException("Review author not eligible to review host");
@@ -93,7 +94,7 @@ public class ReviewService implements IReviewService<Review> {
     }
 
     @Override
-    public boolean guestEligibleToReviewProperty(Long guestId, Long propertyId) {
+    public boolean guestEligibleToReviewProperty(UUID guestId, Long propertyId) {
         Collection<Reservation> eligibleReservations = reservationRepository.findAllPastReservationsAtPropertyForGuestAfterDate(guestId, propertyId, LocalDate.now(clock).minusDays(reviewDeadline));
         Optional<Account> guest = accountService.find(guestId);
         if (guest.isEmpty() || guest.get().getRole() != AccountRole.GUEST || propertyRepository.findPropertyReviewByGuest(propertyId, guestId).isPresent()) {
@@ -103,7 +104,7 @@ public class ReviewService implements IReviewService<Review> {
     }
 
     @Override
-    public boolean guestEligibleToReviewHost(Long guestId, Long hostId) {
+    public boolean guestEligibleToReviewHost(UUID guestId, UUID hostId) {
         Collection<Reservation> eligibleReservations = reservationRepository.findAllPastReservationsAtHostAfterDate(guestId, hostId, LocalDate.now(clock).minusDays(reviewDeadline));
         Optional<Account> guest = accountService.find(guestId);
         if (guest.isEmpty() || guest.get().getRole() != AccountRole.GUEST || reviewRepository.findHostReviewByGuest(hostId, guestId).isPresent()) {
@@ -112,7 +113,7 @@ public class ReviewService implements IReviewService<Review> {
         return !eligibleReservations.isEmpty();
     }
 
-    public Collection<Review> getAllReviewsForHost(Long hostId) {
+    public Collection<Review> getAllReviewsForHost(UUID hostId) {
         return reviewRepository.findApprovedReviewsForHost(hostId);
     }
 

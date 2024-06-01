@@ -8,8 +8,9 @@ import com.lunark.lunark.reports.model.PropertyReport;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.UUID;
 
 public interface IReportService {
-    GeneralReport generateGeneralReport(LocalDate start, LocalDate end, Long hostId);
+    GeneralReport generateGeneralReport(LocalDate start, LocalDate end, UUID hostId);
     PropertyReport generatePropertyReport(Integer year, Long propertyId);
 }

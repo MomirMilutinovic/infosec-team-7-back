@@ -2,8 +2,10 @@ package com.lunark.lunark.auth.dto;
 
 import com.lunark.lunark.auth.model.Account;
 
+import java.util.UUID;
+
 public class AccountVerifiedDto {
-    private Long id;
+    private UUID id;
     private String email;
     private String password;
     private String name;
@@ -16,7 +18,7 @@ public class AccountVerifiedDto {
     public AccountVerifiedDto() {
 
     }
-    public AccountVerifiedDto(Long id, String email, String password, String name, String surname, String address, String phoneNumber, String role, boolean verified) {
+    public AccountVerifiedDto(UUID id, String email, String password, String name, String surname, String address, String phoneNumber, String role, boolean verified) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -36,14 +38,13 @@ public class AccountVerifiedDto {
         this.address = account.getAddress();
         this.phoneNumber = account.getPhoneNumber();
         this.role = account.getRole().toString();
-        this.verified = account.isVerified();
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

@@ -107,7 +107,7 @@ public class ReservationService implements IReservationService {
     }
 
     @Override
-    public List<Reservation> getIncomingReservationsForHostId(Long hostId) {
+    public List<Reservation> getIncomingReservationsForHostId(UUID hostId) {
         List<Property> properties = propertyRepository.findAll().stream().filter(property -> Objects.equals(property.getHost().getId(), hostId)).toList();
         List<Reservation> reservationsForProperties = new ArrayList<>();
         for(Property property: properties) {
@@ -118,7 +118,7 @@ public class ReservationService implements IReservationService {
     }
 
     @Override
-    public List<Reservation> getAllAcceptedReservations(Long guestId) {
+    public List<Reservation> getAllAcceptedReservations(UUID guestId) {
         return reservationRepository.findAll().stream().filter(reservation -> Objects.equals(reservation.getGuest().getId(), guestId) && reservation.getStatus() == ReservationStatus.ACCEPTED).toList();
     }
 
@@ -179,7 +179,7 @@ public class ReservationService implements IReservationService {
     }
 
     @Override
-    public void deleteReservation(Long reservationId, Long accountId) {
+    public void deleteReservation(Long reservationId, UUID accountId) {
         Reservation reservation = findById(reservationId)
                 .filter(r -> r.getStatus() != ReservationStatus.ACCEPTED && Objects.equals(r.getGuest().getId(), accountId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reservation does not exist or it is accepted."));
@@ -210,7 +210,7 @@ public class ReservationService implements IReservationService {
     }
 
     @Override
-    public List<Reservation> getAllReservationsForUser(Long userId) {
+    public List<Reservation> getAllReservationsForUser(UUID userId) {
         Account account = this.accountRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Guest not found"));
         return account.getReservations().stream().toList();
     }

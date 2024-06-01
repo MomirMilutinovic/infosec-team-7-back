@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.UUID;
+
 @DataJpaTest
 @ActiveProfiles("test")
 public class PropertyRepositoryTests {
@@ -15,16 +17,16 @@ public class PropertyRepositoryTests {
 
     @Test
     public void nonExistentPropertyAndNonExistentGuestShouldReturnNothing() {
-        Assertions.assertTrue(propertyRepository.findPropertyReviewByGuest(1234L, 1234L).isEmpty());
+        Assertions.assertTrue(propertyRepository.findPropertyReviewByGuest(1234L, UUID.randomUUID()).isEmpty());
     }
 
     @Test
     public void existentPropertyButGuestDidNotWriteReviewShouldReturnNothing() {
-        Assertions.assertTrue(propertyRepository.findPropertyReviewByGuest(4L, 6L).isEmpty());
+        Assertions.assertTrue(propertyRepository.findPropertyReviewByGuest(4L, UUID.randomUUID()).isEmpty());
     }
 
     @Test
     public void guestWroteReviewForPropertyShouldReturnReview() {
-        Assertions.assertTrue(propertyRepository.findPropertyReviewByGuest(4L, 1L).isPresent());
+        Assertions.assertTrue(propertyRepository.findPropertyReviewByGuest(4L, UUID.randomUUID()).isPresent());
     }
 }

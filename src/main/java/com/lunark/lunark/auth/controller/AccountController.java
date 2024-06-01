@@ -30,6 +30,7 @@ import javax.print.attribute.standard.Media;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -51,7 +52,7 @@ public class AccountController {
     ModelMapper modelMapper;
 
     @GetMapping(path="/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDto> getAccount(@PathVariable("id") Long id) {
+    public ResponseEntity<AccountDto> getAccount(@PathVariable("id") UUID id) {
         Optional<Account> account = accountService.find(id);
         if (account.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -61,18 +62,10 @@ public class AccountController {
     }
 
     @GetMapping(value ="/average/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Double> getAverageGrade(@PathVariable("id") Long id) {
+    public ResponseEntity<Double> getAverageGrade(@PathVariable("id") UUID id) {
         Double averageGrade = accountService.getAverageGrade(id);
         if (averageGrade == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(averageGrade, HttpStatus.OK);
-    }
-
-    @PostMapping(path="", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDto> createAccount(@Valid @RequestBody AccountSignUpDto accountDto) {
-        Account newAccount = accountDto.toAccount();
-        Account account = accountService.create(newAccount);
-        verificationService.createVerificationLink(account);
-        return new ResponseEntity<>(modelMapper.map(account, AccountDto.class), HttpStatus.CREATED);
     }
 
     @GetMapping(path="/nonadmins", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,7 +77,7 @@ public class AccountController {
 
     @DeleteMapping(path="/{id}")
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
-    public ResponseEntity<AccountDto> deleteAccount(@PathVariable("id") Long id) {
+    public ResponseEntity<AccountDto> deleteAccount(@PathVariable("id") UUID id) {
         if(accountService.find(id).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -98,14 +91,13 @@ public class AccountController {
 
     @PutMapping(path="/{id}")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GUEST') or hasAuthority('HOST')")
-    public ResponseEntity<AccountDto> updateAccount(@RequestBody AccountSignUpDto accountDto, @PathVariable("id") Long id) {
+    public ResponseEntity<AccountDto> updateAccount(@RequestBody AccountSignUpDto accountDto, @PathVariable("id") UUID id) {
         Optional<Account> accountOptional = accountService.find(id);
         if(accountOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Account account = accountDto.toAccount();
         account.setId(id);
-        account.setVerified(accountOptional.get().isVerified());
         accountService.update(account);
         return new ResponseEntity<>(modelMapper.map(account, AccountDto.class), HttpStatus.OK);
     }
@@ -135,6 +127,7 @@ public class AccountController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    // TODO: Delete me after keycloak account verification is added
     @PostMapping(path="/verify/{verification_link_id}")
     public ResponseEntity<?> verifyAccount(@PathVariable("verification_link_id") Long verificationLinkId) {
         if (this.verificationService.verify(verificationLinkId)) {
@@ -142,12 +135,6 @@ public class AccountController {
         } else {
             return new ResponseEntity<>("Verification link already used or expired", HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @PostMapping(value = "/block/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> blockAccount(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping(path="/favorites/{id}")
@@ -203,7 +190,7 @@ public class AccountController {
     }
 
     @GetMapping(value = "/{id}/profile-image", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> getProfileImage(@PathVariable("id") Long userId) {
+    public ResponseEntity<byte[]> getProfileImage(@PathVariable("id") UUID userId) {
         Optional<Account> account = this.accountService.find(userId);
         if (account.isEmpty() || account.get().getProfileImage() == null) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);

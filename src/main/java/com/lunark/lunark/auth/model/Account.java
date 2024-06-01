@@ -27,12 +27,10 @@ import java.util.*;
 @Data
 public class Account implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-    @Column
-    private String password;
     @Column
     private String name;
     @Column
@@ -42,11 +40,7 @@ public class Account implements UserDetails {
     @Column
     private String phoneNumber;
     @Column
-    private boolean verified;
-    @Column
     private AccountRole role;
-    @Column
-    private boolean blocked;
     @Embedded
     private ProfileImage profileImage;
 
@@ -94,27 +88,16 @@ public class Account implements UserDetails {
 
     }
 
-    public Account(Long id, String email, String password, String name, String surname, String address, String phoneNumber, boolean verified, AccountRole role, boolean notificationsEnabled, boolean blocked, Collection<Review> reviews, HashSet<Property> favoriteProperties) {
+    public Account(UUID id, String email, String name, String surname, String address, String phoneNumber, boolean verified, AccountRole role, boolean notificationsEnabled, Collection<Review> reviews, HashSet<Property> favoriteProperties) {
         this.id = id;
         this.email = email;
-        this.password = password;
         this.name = name;
         this.surname = surname;
         this.address = address;
         this.phoneNumber = phoneNumber;
-        this.verified = verified;
         this.role = role;
-        this.blocked = blocked;
         this.reviews = reviews;
         this.favoriteProperties = favoriteProperties;
-    }
-
-    public void verify() {
-        verified = true;
-    }
-
-    public boolean canLogIn() {
-        return verified && !blocked;
     }
 
     @Override
@@ -124,8 +107,9 @@ public class Account implements UserDetails {
         return grantedAuthorities;
     }
 
+    @Override
     public String getPassword() {
-        return password;
+        return null;
     }
 
     @Override
@@ -140,7 +124,7 @@ public class Account implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return verified && !blocked;
+        return true;
     }
 
     @Override
@@ -153,15 +137,11 @@ public class Account implements UserDetails {
         return true;
     }
 
-    public boolean credentialsMatch(String email, String password) {
-        return this.email.equals(email) && this.email.equals(password);
-    }
-
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -171,10 +151,6 @@ public class Account implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getName() {
@@ -209,28 +185,12 @@ public class Account implements UserDetails {
         this.phoneNumber = phoneNumber;
     }
 
-    public boolean isVerified() {
-        return verified;
-    }
-
-    public void setVerified(boolean verified) {
-        this.verified = verified;
-    }
-
     public AccountRole getRole() {
         return role;
     }
 
     public void setRole(AccountRole role) {
         this.role = role;
-    }
-
-    public boolean isBlocked() {
-        return blocked;
-    }
-
-    public void setBlocked(boolean blocked) {
-        this.blocked = blocked;
     }
 
     public Collection<Review> getReviews() {

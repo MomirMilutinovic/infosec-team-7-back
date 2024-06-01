@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -14,6 +15,6 @@ import java.time.LocalDateTime;
 public class ReviewReportResponseDto {
     private Long id;
     private LocalDateTime date;
-    private Long reporterId;
+    private UUID reporterId;
     private Long reviewId;
 }

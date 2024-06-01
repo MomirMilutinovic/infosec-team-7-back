@@ -3,6 +3,7 @@ package com.lunark.lunark.reservations.dto;
 import com.lunark.lunark.reservations.model.Reservation;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class ReservationDto {
     private Long id;
@@ -11,12 +12,12 @@ public class ReservationDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private double price;
-    private Long guestId;
+    private UUID guestId;
     private int numberOfGuests;
     private String status;
     private int guestCancellationCount;
 
-    public ReservationDto(Long id, Long propertyId, String propertyName, LocalDate startDate, LocalDate endDate, double price, Long guestId, int numberOfGuests, String status, int guestCancellationCount) {
+    public ReservationDto(Long id, Long propertyId, String propertyName, LocalDate startDate, LocalDate endDate, double price, UUID guestId, int numberOfGuests, String status, int guestCancellationCount) {
         this.id = id;
         this.propertyId = propertyId;
         this.propertyName = propertyName;
@@ -82,11 +83,11 @@ public class ReservationDto {
         this.price = price;
     }
 
-    public Long getGuestId() {
+    public UUID getGuestId() {
         return guestId;
     }
 
-    public void setGuestId(Long guestId) {
+    public void setGuestId(UUID guestId) {
         this.guestId = guestId;
     }
 

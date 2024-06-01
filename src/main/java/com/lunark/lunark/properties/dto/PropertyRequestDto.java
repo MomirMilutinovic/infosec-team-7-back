@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -49,8 +50,8 @@ public class PropertyRequestDto {
     Collection<AvailabilityEntryDto> availabilityEntries;
     @NotNull
     Property.PropertyType type;
-    @PositiveOrZero
-    Long hostId;
+    @NotNull
+    UUID hostId;
     @Min(-90)
     @Max(90)
     double latitude;

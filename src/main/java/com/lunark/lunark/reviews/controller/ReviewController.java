@@ -23,6 +23,7 @@ import java.time.Clock;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -50,7 +51,7 @@ public class ReviewController {
     }
 
     @GetMapping(value = "/host/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<ReviewDto>> getReviewForHost(@PathVariable("id") @NotNull @PositiveOrZero Long id) {
+    public ResponseEntity<Collection<ReviewDto>> getReviewForHost(@PathVariable("id") @NotNull @PositiveOrZero UUID id) {
         Collection<Review> reviews = reviewService.getAllReviewsForHost(id);
         if(reviews == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -81,7 +82,7 @@ public class ReviewController {
 
     @PreAuthorize("hasAuthority('GUEST')")
     @PostMapping(value = "/host/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ReviewDto> createHostReview(@Valid @RequestBody ReviewRequestDto reviewDto, @PathVariable(value = "id") @NotNull @PositiveOrZero Long id) {
+    public ResponseEntity<ReviewDto> createHostReview(@Valid @RequestBody ReviewRequestDto reviewDto, @PathVariable(value = "id") @NotNull UUID id) {
         Account guest = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!this.reviewService.guestEligibleToReviewHost(guest.getId(), id)) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
@@ -159,7 +160,7 @@ public class ReviewController {
     }
 
     @GetMapping(value = "host-review-eligibility/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HostReviewEligibilityDto> checkEligibilityToReviewHost(@PathVariable("id") @NotNull @PositiveOrZero Long id) {
+    public ResponseEntity<HostReviewEligibilityDto> checkEligibilityToReviewHost(@PathVariable("id") @NotNull @PositiveOrZero UUID id) {
         Account guest;
         try {
             guest = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class HostReviewEligibilityDto {
     private boolean eligible;
-    private Long guestId;
-    private Long hostId;
+    private UUID guestId;
+    private UUID hostId;
 }

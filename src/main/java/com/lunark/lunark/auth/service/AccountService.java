@@ -20,10 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class AccountService implements IAccountService {
@@ -48,19 +45,12 @@ public class AccountService implements IAccountService {
 
     @Override
     public Account create(Account account) {
-        account.setVerified(false);
-        account.setPassword(passwordEncoder.encode(account.getPassword()));
         return accountRepository.saveAndFlush(account);
     }
 
     @Override
-    public Optional<Account> find(Long id) {
+    public Optional<Account> find(UUID id) {
         return accountRepository.findById(id);
-    }
-
-    @Override
-    public Optional<Account> find(String email, String password) {
-        return accountRepository.findByEmailAndPassword(email, password);
     }
 
     @Override
@@ -70,16 +60,12 @@ public class AccountService implements IAccountService {
 
     @Override
     public Account update(Account account) {
+        // TODO: Update in LDAP
         Optional<Account> oldAccountOptional = accountRepository.findById(account.getId());
         if (oldAccountOptional.isEmpty()) {
             return null;
         }
         Account oldAccount = oldAccountOptional.get();
-        if (account.getPassword() == null) {
-            account.setPassword(oldAccount.getPassword());
-        } else {
-            account.setPassword(passwordEncoder.encode(account.getPassword()));
-        }
         if (oldAccount.getProfileImage() != null) {
             account.setProfileImage(oldAccount.getProfileImage());
         }
@@ -91,7 +77,8 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public boolean delete(Long id) {
+    public boolean delete(UUID id) {
+        // TODO: Delete account in LDAP
         Optional<Account> accountToRemove = accountRepository.findById(id);
         if (accountToRemove.isEmpty()) {
             return false;
@@ -113,14 +100,14 @@ public class AccountService implements IAccountService {
         return accountRole == AccountRole.GUEST;
     }
 
-    private void handleUserAccountDeletion(Long userId) {
+    private void handleUserAccountDeletion(UUID userId) {
         List<Reservation> reservationList = reservationService.getAllReservationsForUser(userId);
         if (noAcceptedReservations(reservationList)) {
             accountRepository.deleteById(userId);
         }
     }
 
-    private void handleHostAccountDeletion(Long hostId, List<Property> propertiesList) {
+    private void handleHostAccountDeletion(UUID hostId, List<Property> propertiesList) {
         List<Reservation> reservationList = reservationService.getAllReservationsForPropertiesList(propertiesList);
         if (noAcceptedReservations(reservationList)) {
             for (Property property : propertiesList) {
@@ -145,7 +132,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account toggleNotifications(Long accountId, NotificationType type) {
+    public Account toggleNotifications(UUID accountId, NotificationType type) {
         Optional<Account> account = find(accountId);
 
         return account.map(a -> {
@@ -155,7 +142,8 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public boolean updatePassword(Long accountId, String oldPassword, String newPassword) {
+    public boolean updatePassword(UUID accountId, String oldPassword, String newPassword) {
+        // TODO: Update password in LDAP
         Optional<Account> accountToUpdate = accountRepository.findById(accountId);
         if (accountToUpdate.isEmpty() || !isOldPasswordCorrect(accountToUpdate.get(), oldPassword)) {
             return false;
@@ -165,18 +153,19 @@ public class AccountService implements IAccountService {
     }
 
     private boolean isOldPasswordCorrect(Account account, String oldPassword) {
+        // TODO: Check password from LDAP
         String currentPassword = account.getPassword();
         return passwordEncoder.matches(oldPassword, currentPassword);
     }
 
     private void updateAccountPassword(Account account, String newPassword) {
+        // TODO: Encode password for LDAP
         String encodedNewPassword = passwordEncoder.encode(newPassword);
-        account.setPassword(encodedNewPassword);
         accountRepository.saveAndFlush(account);
     }
 
     @Override
-    public Double getAverageGrade(Long id) {
+    public Double getAverageGrade(UUID id) {
         Optional<Account> account = this.find(id);
         if (account.isEmpty()) {
             return null;
@@ -186,7 +175,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Collection<Property> getFavoriteProperties(Long accountId) {
+    public Collection<Property> getFavoriteProperties(UUID accountId) {
         Optional<Account> account = this.find(accountId);
         if (account.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account not found");
@@ -197,7 +186,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public void removeFromFavorites(Long id, Property property) {
+    public void removeFromFavorites(UUID id, Property property) {
         this.find(id).ifPresentOrElse(account -> {
             account.getFavoriteProperties().remove(property);
             update(account);
@@ -207,7 +196,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public void saveProfileImage(Long accountId, MultipartFile file) throws IOException {
+    public void saveProfileImage(UUID accountId, MultipartFile file) throws IOException {
         Optional<Account> account = this.find(accountId);
         if (account.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account not found");
@@ -245,7 +234,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public void addToFavorites(Long id, Property property) {
+    public void addToFavorites(UUID id, Property property) {
         this.find(id).ifPresentOrElse(account -> {
             account.getFavoriteProperties().add(property);
             update(account);

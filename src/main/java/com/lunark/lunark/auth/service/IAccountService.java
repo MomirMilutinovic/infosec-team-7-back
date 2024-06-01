@@ -10,22 +10,22 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IAccountService {
     Collection<Account> findAll();
     Account create(Account account);
-    Optional<Account> find(Long id);
-    Optional<Account> find(String username, String password);
+    Optional<Account> find(UUID id);
     Optional<Account> find(String email);
     Account update(Account account);
-    boolean delete(Long id);
-    boolean updatePassword(Long id, String oldPassword, String newPassword);
-    void addToFavorites(Long id, Property property);
-    Double getAverageGrade(Long id);
-    Collection<Property> getFavoriteProperties(Long accountId);
-    void removeFromFavorites(Long id, Property property);
-    void saveProfileImage(Long accountId, MultipartFile file) throws IOException;
+    boolean delete(UUID id);
+    boolean updatePassword(UUID id, String oldPassword, String newPassword);
+    void addToFavorites(UUID id, Property property);
+    Double getAverageGrade(UUID id);
+    Collection<Property> getFavoriteProperties(UUID accountId);
+    void removeFromFavorites(UUID id, Property property);
+    void saveProfileImage(UUID accountId, MultipartFile file) throws IOException;
     void saveAndFlush(Account account);
     public void cancelAllReservations(List<Reservation> reservationList);
-    Account toggleNotifications(Long accountId, NotificationType type);
+    Account toggleNotifications(UUID accountId, NotificationType type);
 }

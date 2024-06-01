@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class NotificationService implements INotificationService {
@@ -34,7 +31,7 @@ public class NotificationService implements INotificationService {
 
     @Override
     @Transactional
-    public Collection<Notification> getAllNotifications(Long accountId) {
+    public Collection<Notification> getAllNotifications(UUID accountId) {
         Collection<Notification> notifications = this.notificationRepository.findByAccount_IdOrderByDateDesc(accountId);
         this.notificationRepository.markAllNotificationsAsRead(accountId);
         return notifications;

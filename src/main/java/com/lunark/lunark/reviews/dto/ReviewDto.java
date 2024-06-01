@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +17,7 @@ public class ReviewDto {
     private String description;
     private LocalDateTime date;
     private String author;
-    private Long authorId;
+    private UUID authorId;
     private Review.ReviewType type;
     private Long id;
 
