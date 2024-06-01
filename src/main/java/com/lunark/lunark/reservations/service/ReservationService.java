@@ -212,7 +212,7 @@ public class ReservationService implements IReservationService {
     @Override
     public List<Reservation> getAllReservationsForUser(UUID userId) {
         Account account = this.accountRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Guest not found"));
-        return account.getReservations().stream().toList();
+        return account.getReservations() == null ? new ArrayList<>() : account.getReservations().stream().toList();
     }
 
     @Override

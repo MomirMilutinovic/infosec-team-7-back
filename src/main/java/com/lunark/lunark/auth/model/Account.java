@@ -27,7 +27,6 @@ import java.util.*;
 @Data
 public class Account implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -88,7 +87,7 @@ public class Account implements UserDetails {
 
     }
 
-    public Account(UUID id, String email, String name, String surname, String address, String phoneNumber, boolean verified, AccountRole role, boolean notificationsEnabled, Collection<Review> reviews, HashSet<Property> favoriteProperties) {
+    public Account(UUID id, String email, String name, String surname, String address, String phoneNumber, AccountRole role, Collection<Review> reviews, HashSet<Property> favoriteProperties) {
         this.id = id;
         this.email = email;
         this.name = name;

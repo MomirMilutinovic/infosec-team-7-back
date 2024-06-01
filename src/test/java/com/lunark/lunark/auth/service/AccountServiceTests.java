@@ -3,7 +3,6 @@ package com.lunark.lunark.auth.service;
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
 import com.lunark.lunark.auth.repository.IAccountRepository;
-import com.lunark.lunark.auth.service.AccountService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -32,12 +31,12 @@ public class AccountServiceTests {
     @InjectMocks
     private AccountService accountService;
 
-    private Account account = new Account(UUID.randomUUID(), "host@example.com", "Mirna", "Studsluzvic", "Trg Dositeja Obradovica 6, Novi Sad", "021555555", true, AccountRole.HOST, false, null, null);
+    private Account account = new Account(UUID.randomUUID(), "host@example.com", "Mirna", "Studsluzvic", "Trg Dositeja Obradovica 6, Novi Sad", "021555555", AccountRole.HOST, null, null);
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        account = new Account(UUID.randomUUID(), "host@example.com", "Mirna", "Studsluzbic", "Trg Dositeja Obradovica 6, Novi Sad", "021555555", true, AccountRole.HOST, false, null, null);
+        account = new Account(UUID.randomUUID(), "host@example.com", "Mirna", "Studsluzbic", "Trg Dositeja Obradovica 6, Novi Sad", "021555555", AccountRole.HOST, null, null);
     }
 
     @Test

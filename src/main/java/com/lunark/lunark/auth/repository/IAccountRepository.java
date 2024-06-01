@@ -11,7 +11,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IAccountRepository extends JpaRepository<Account, UUID> {
-    List<Account> findAll();
-    Optional<Account> findById(UUID id);
     Optional<Account> findByEmail(String email);
 }

@@ -118,7 +118,7 @@ public class AccountService implements IAccountService {
     }
 
     public static boolean noAcceptedReservations(List<Reservation> reservationList) {
-        return reservationList.stream().noneMatch(reservation -> reservation.getStatus() == ReservationStatus.ACCEPTED);
+        return reservationList == null || reservationList.stream().noneMatch(reservation -> reservation.getStatus() == ReservationStatus.ACCEPTED);
     }
 
     @Override

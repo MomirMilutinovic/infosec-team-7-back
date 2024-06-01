@@ -2,13 +2,8 @@ package com.lunark.lunark.auth.dto;
 
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
-import com.lunark.lunark.properties.model.Property;
 import jakarta.validation.constraints.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.UUID;
@@ -129,6 +124,6 @@ public class AccountSignUpDto {
     public Account toAccount() {
         AccountRole accountRole = AccountRole.fromString(this.role);
 
-        return new Account(id, email, name, surname, address, phoneNumber, false, accountRole, false, new ArrayList<>(), new HashSet<>());
+        return new Account(id, email, name, surname, address, phoneNumber, accountRole, new ArrayList<>(), new HashSet<>());
     }
 }
