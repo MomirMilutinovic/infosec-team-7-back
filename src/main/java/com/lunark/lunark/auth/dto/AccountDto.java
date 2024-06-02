@@ -7,11 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 public class AccountDto {
-    private Long id;
+    private UUID id;
     private String email;
     private String name;
     private String surname;
