@@ -89,8 +89,8 @@ public class LdapAccount {
                 address,
                 phoneNumber,
                 AccountRole.GUEST,
-                new ArrayList<>(),
-                new HashSet<>()
+                null,
+                null
         );
         account.setGuestNotificationSettings(this.getGuestNotificationSettings());
         account.setHostNotificationSettings(this.getHostNotificationSettings());

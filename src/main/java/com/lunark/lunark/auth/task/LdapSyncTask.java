@@ -43,7 +43,10 @@ public class LdapSyncTask {
             if (accountOptional.isEmpty()) {
                 accountService.create(ldapUser.toAccount());
             } else {
-                accountService.update(ldapUser.toAccount());
+                Account updatedAccount = ldapUser.toAccount();
+                updatedAccount.setReviews(accountOptional.get().getReviews());
+                updatedAccount.setFavoriteProperties(accountOptional.get().getFavoriteProperties());
+                accountService.update(updatedAccount);
             }
         }
 
