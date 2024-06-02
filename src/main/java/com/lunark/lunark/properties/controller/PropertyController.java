@@ -97,7 +97,7 @@ public class PropertyController {
 
     @GetMapping(value="/my-properties", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('HOST')")
-    public ResponseEntity<List<PropertyResponseDto>> getMyProperties(@RequestParam("hostId") @NotNull @PositiveOrZero UUID hostId, SpringDataWebProperties pageable) {
+    public ResponseEntity<List<PropertyResponseDto>> getMyProperties(@RequestParam("hostId") @NotNull UUID hostId, SpringDataWebProperties pageable) {
         List<Property> myProperties = propertyService.findAllPropertiesForHost(hostId);
         List<PropertyResponseDto> propertyDtos = myProperties.stream() .map(PropertyDtoMapper::fromPropertyToDto) .toList();
         return new ResponseEntity<>(propertyDtos, HttpStatus.OK);

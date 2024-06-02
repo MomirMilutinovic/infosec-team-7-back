@@ -51,7 +51,7 @@ public class ReviewController {
     }
 
     @GetMapping(value = "/host/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<ReviewDto>> getReviewForHost(@PathVariable("id") @NotNull @PositiveOrZero UUID id) {
+    public ResponseEntity<Collection<ReviewDto>> getReviewForHost(@PathVariable("id") @NotNull UUID id) {
         Collection<Review> reviews = reviewService.getAllReviewsForHost(id);
         if(reviews == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -160,7 +160,7 @@ public class ReviewController {
     }
 
     @GetMapping(value = "host-review-eligibility/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HostReviewEligibilityDto> checkEligibilityToReviewHost(@PathVariable("id") @NotNull @PositiveOrZero UUID id) {
+    public ResponseEntity<HostReviewEligibilityDto> checkEligibilityToReviewHost(@PathVariable("id") @NotNull UUID id) {
         Account guest;
         try {
             guest = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
