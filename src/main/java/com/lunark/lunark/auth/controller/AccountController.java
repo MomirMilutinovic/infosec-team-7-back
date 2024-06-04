@@ -13,7 +13,6 @@ import com.lunark.lunark.mapper.PropertyDtoMapper;
 import com.lunark.lunark.notifications.dto.NotificationSettingsDto;
 import com.lunark.lunark.properties.dto.PropertyResponseDto;
 import com.lunark.lunark.properties.service.IPropertyService;
-import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.print.attribute.standard.Media;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -98,7 +96,8 @@ public class AccountController {
         }
         Account account = accountDto.toAccount();
         account.setId(id);
-        accountService.update(account);
+        accountService.updateSql(account);
+        accountService.updateLdap(account);
         return new ResponseEntity<>(modelMapper.map(account, AccountDto.class), HttpStatus.OK);
     }
 

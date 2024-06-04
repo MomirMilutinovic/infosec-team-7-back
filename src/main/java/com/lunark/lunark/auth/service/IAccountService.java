@@ -17,7 +17,7 @@ public interface IAccountService {
     Account create(Account account);
     Optional<Account> find(UUID id);
     Optional<Account> find(String email);
-    Account update(Account account);
+    Account updateSql(Account account);
     boolean delete(UUID id);
     boolean updatePassword(UUID id, String oldPassword, String newPassword);
     void addToFavorites(UUID id, Property property);
@@ -28,4 +28,5 @@ public interface IAccountService {
     void saveAndFlush(Account account);
     public void cancelAllReservations(List<Reservation> reservationList);
     Account toggleNotifications(UUID accountId, NotificationType type);
+    boolean updateLdap(Account account);
 }

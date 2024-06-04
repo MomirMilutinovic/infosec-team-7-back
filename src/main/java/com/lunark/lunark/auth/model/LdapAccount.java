@@ -8,8 +8,6 @@ import org.springframework.ldap.odm.annotations.Entry;
 import org.springframework.ldap.odm.annotations.Id;
 
 import javax.naming.Name;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.UUID;
 
 @Entry(
@@ -65,6 +63,9 @@ public class LdapAccount {
     @Attribute(name = "notifyOnReservationRequestResponse")
     private boolean notifyOnReservationRequestResponse;
 
+    @Attribute(name = "mimeType")
+    private String profileImageMimeType;
+
     @Attribute(name = "imageData")
     private byte[] profileImageData;
 
@@ -95,6 +96,20 @@ public class LdapAccount {
         account.setGuestNotificationSettings(this.getGuestNotificationSettings());
         account.setHostNotificationSettings(this.getHostNotificationSettings());
         account.setDeleted(false);
+        if (profileImageData != null) {
+            account.setProfileImage(new ProfileImage(profileImageData, profileImageMimeType));
+        }
         return account;
+    }
+
+    public void copyFields(Account account) {
+        this.setEmail(account.getEmail());
+        this.setName(account.getName());
+        this.setSurname(account.getSurname());
+        this.setAddress(account.getAddress());
+        if (account.getProfileImage() != null) {
+            this.setProfileImageData(account.getProfileImage().getImageData());
+            this.setProfileImageMimeType(account.getProfileImage().getMimeType());
+        }
     }
 }

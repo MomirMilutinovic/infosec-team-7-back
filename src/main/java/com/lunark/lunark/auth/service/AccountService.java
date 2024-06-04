@@ -2,8 +2,10 @@ package com.lunark.lunark.auth.service;
 
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.auth.model.ProfileImage;
 import com.lunark.lunark.auth.repository.IAccountRepository;
+import com.lunark.lunark.auth.repository.ILdapAccountRepository;
 import com.lunark.lunark.notifications.model.NotificationType;
 import com.lunark.lunark.properties.model.Property;
 import com.lunark.lunark.properties.service.IPropertyService;
@@ -36,6 +38,9 @@ public class AccountService implements IAccountService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    ILdapAccountRepository ldapAccountRepository;
+
 
     @Override
     public Collection<Account> findAll() {
@@ -59,7 +64,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public Account update(Account account) {
+    public Account updateSql(Account account) {
         // TODO: Update in LDAP
         Optional<Account> oldAccountOptional = accountRepository.findById(account.getId());
         if (oldAccountOptional.isEmpty()) {
@@ -74,6 +79,17 @@ public class AccountService implements IAccountService {
             account.setHostNotificationSettings(oldAccount.getHostNotificationSettings());
         }
         return accountRepository.saveAndFlush(account);
+    }
+
+    public boolean updateLdap(Account account) {
+        Optional<LdapAccount> ldapAccountOptional = ldapAccountRepository.findByEmail(account.getEmail());
+        if (ldapAccountOptional.isEmpty()) {
+            return false;
+        }
+        LdapAccount ldapAccount = ldapAccountOptional.get();
+        ldapAccount.copyFields(account);
+        ldapAccountRepository.save(ldapAccount);
+        return true;
     }
 
     @Override
@@ -189,7 +205,7 @@ public class AccountService implements IAccountService {
     public void removeFromFavorites(UUID id, Property property) {
         this.find(id).ifPresentOrElse(account -> {
             account.getFavoriteProperties().remove(property);
-            update(account);
+            updateSql(account);
         }, () -> {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account not found");
         });
@@ -217,6 +233,7 @@ public class AccountService implements IAccountService {
         account.get().setProfileImage(profileImage);
 
         accountRepository.save(account.get());
+        updateLdap(account.get());
     }
 
     @Override
@@ -237,7 +254,7 @@ public class AccountService implements IAccountService {
     public void addToFavorites(UUID id, Property property) {
         this.find(id).ifPresentOrElse(account -> {
             account.getFavoriteProperties().add(property);
-            update(account);
+            updateSql(account);
         }, () -> {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account not found");
         });

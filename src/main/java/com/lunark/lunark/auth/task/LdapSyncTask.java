@@ -2,7 +2,6 @@ package com.lunark.lunark.auth.task;
 
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.LdapAccount;
-import com.lunark.lunark.auth.repository.IAccountRepository;
 import com.lunark.lunark.auth.repository.ILdapAccountRepository;
 import com.lunark.lunark.auth.service.IAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,17 +9,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 public class LdapSyncTask {
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Autowired
     IAccountService accountService;
@@ -46,7 +39,7 @@ public class LdapSyncTask {
                 Account updatedAccount = ldapUser.toAccount();
                 updatedAccount.setReviews(accountOptional.get().getReviews());
                 updatedAccount.setFavoriteProperties(accountOptional.get().getFavoriteProperties());
-                accountService.update(updatedAccount);
+                accountService.updateSql(updatedAccount);
             }
         }
 
