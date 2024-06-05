@@ -45,7 +45,7 @@ public class AccountService implements IAccountService {
     PasswordEncoder passwordEncoder;
 
     @Autowired
-    ILdapAccountRepository ldapAccountRepository;
+    ILdapAccountService ldapAccountService;
 
     @Value("${spring.ldap.urls}")
     String ldapUrl;
@@ -92,13 +92,13 @@ public class AccountService implements IAccountService {
 
     public boolean updateLdap(Account account) {
         // TODO: Make update have an effect on both ldap and sql, and remove this method
-        Optional<LdapAccount> ldapAccountOptional = ldapAccountRepository.findByUuid(account.getId());
+        Optional<LdapAccount> ldapAccountOptional = ldapAccountService.find(account.getId());
         if (ldapAccountOptional.isEmpty()) {
             return false;
         }
         LdapAccount ldapAccount = ldapAccountOptional.get();
         ldapAccount.copyFields(account);
-        ldapAccountRepository.save(ldapAccount);
+        ldapAccountService.update(ldapAccount);
         return true;
     }
 
@@ -169,8 +169,7 @@ public class AccountService implements IAccountService {
 
     @Override
     public boolean updatePassword(UUID accountId, String oldPassword, String newPassword) {
-        // TODO: Update password in LDAP
-        Optional<LdapAccount> accountToUpdate = ldapAccountRepository.findByUuid(accountId);
+        Optional<LdapAccount> accountToUpdate = ldapAccountService.find(accountId);
         if (accountToUpdate.isEmpty() || !isOldPasswordCorrect(accountToUpdate.get(), oldPassword)) {
             return false;
         }
@@ -201,7 +200,7 @@ public class AccountService implements IAccountService {
 
     private void updateAccountPassword(LdapAccount account, String newPassword) {
         account.setPassword(newPassword);
-        ldapAccountRepository.save(account);
+        ldapAccountService.update(account);
     }
 
     @Override
