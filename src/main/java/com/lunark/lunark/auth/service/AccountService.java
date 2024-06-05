@@ -15,12 +15,18 @@ import com.lunark.lunark.reservations.service.IReservationService;
 import com.lunark.lunark.reviews.model.Review;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.naming.AuthenticationException;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 import java.io.IOException;
 import java.util.*;
 
@@ -40,6 +46,9 @@ public class AccountService implements IAccountService {
 
     @Autowired
     ILdapAccountRepository ldapAccountRepository;
+
+    @Value("${spring.ldap.urls}")
+    String ldapUrl;
 
 
     @Override
@@ -82,7 +91,8 @@ public class AccountService implements IAccountService {
     }
 
     public boolean updateLdap(Account account) {
-        Optional<LdapAccount> ldapAccountOptional = ldapAccountRepository.findByEmail(account.getEmail());
+        // TODO: Make update have an effect on both ldap and sql, and remove this method
+        Optional<LdapAccount> ldapAccountOptional = ldapAccountRepository.findByUuid(account.getId());
         if (ldapAccountOptional.isEmpty()) {
             return false;
         }
@@ -160,7 +170,7 @@ public class AccountService implements IAccountService {
     @Override
     public boolean updatePassword(UUID accountId, String oldPassword, String newPassword) {
         // TODO: Update password in LDAP
-        Optional<Account> accountToUpdate = accountRepository.findById(accountId);
+        Optional<LdapAccount> accountToUpdate = ldapAccountRepository.findByUuid(accountId);
         if (accountToUpdate.isEmpty() || !isOldPasswordCorrect(accountToUpdate.get(), oldPassword)) {
             return false;
         }
@@ -168,16 +178,30 @@ public class AccountService implements IAccountService {
         return true;
     }
 
-    private boolean isOldPasswordCorrect(Account account, String oldPassword) {
+    private boolean isOldPasswordCorrect(LdapAccount account, String oldPassword) {
         // TODO: Check password from LDAP
-        String currentPassword = account.getPassword();
-        return passwordEncoder.matches(oldPassword, currentPassword);
+        Hashtable<String, String> environment = new Hashtable<>();
+
+        environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        environment.put(Context.PROVIDER_URL, ldapUrl);
+        environment.put(Context.SECURITY_AUTHENTICATION, "simple");
+        environment.put(Context.SECURITY_PRINCIPAL, "cn=" + account.getEmail() + ",dc=booking,ou=users,ou=system");
+        environment.put(Context.SECURITY_CREDENTIALS, oldPassword);
+
+        try {
+            DirContext context = new InitialDirContext(environment);
+            context.close();
+            return true;
+        } catch (AuthenticationException e) {
+            return false;
+        } catch (NamingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void updateAccountPassword(Account account, String newPassword) {
-        // TODO: Encode password for LDAP
-        String encodedNewPassword = passwordEncoder.encode(newPassword);
-        accountRepository.saveAndFlush(account);
+    private void updateAccountPassword(LdapAccount account, String newPassword) {
+        account.setPassword(newPassword);
+        ldapAccountRepository.save(account);
     }
 
     @Override

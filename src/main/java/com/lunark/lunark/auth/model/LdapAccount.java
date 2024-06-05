@@ -23,7 +23,7 @@ public class LdapAccount {
     private Name dn;
 
     @Attribute(name = "id")
-    private UUID id;
+    private UUID uuid;
 
     @Attribute(name = "email")
     private String email;
@@ -69,6 +69,9 @@ public class LdapAccount {
     @Attribute(name = "imageData")
     private byte[] profileImageData;
 
+    @Attribute(name = "userPassword")
+    private String password;
+
 
     public LdapAccount() {
     }
@@ -83,7 +86,7 @@ public class LdapAccount {
 
     public Account toAccount() {
         Account account = new Account(
-                id,
+                uuid,
                 email,
                 name,
                 surname,

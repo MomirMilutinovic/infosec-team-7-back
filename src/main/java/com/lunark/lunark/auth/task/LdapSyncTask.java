@@ -31,7 +31,7 @@ public class LdapSyncTask {
         // Iterate through LDAP users and synchronize with SQL database
         for (LdapAccount ldapUser : ldapUsers) {
             // Check if the user exists in the SQL database
-            Optional<Account> accountOptional = accountService.find(ldapUser.getId());
+            Optional<Account> accountOptional = accountService.find(ldapUser.getUuid());
 
             if (accountOptional.isEmpty()) {
                 accountService.create(ldapUser.toAccount());
@@ -59,7 +59,7 @@ public class LdapSyncTask {
         // Filter the SQL users to only those that are not in the LDAP user list
         return sqlUsers.stream()
                 .filter(account -> ldapUsers.stream()
-                        .noneMatch(ldapUser -> ldapUser.getId().equals(account.getId())))
+                        .noneMatch(ldapUser -> ldapUser.getUuid().equals(account.getId())))
                 .toList();
     }
 }

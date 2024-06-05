@@ -8,5 +8,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ILdapAccountRepository extends LdapRepository<LdapAccount> {
-    Optional<LdapAccount> findByEmail(String email);
+    Optional<LdapAccount> findByUuid(UUID uuid);
 }
