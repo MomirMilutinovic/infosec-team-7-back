@@ -2,6 +2,7 @@ package com.lunark.lunark.reservations.controller;
 
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.mapper.ReservationDtoMapper;
 import com.lunark.lunark.reservations.dto.ReservationResponseDto;
 import com.lunark.lunark.reservations.dto.ReservationDto;
@@ -55,7 +56,7 @@ public class ReservationController {
     @DeleteMapping(path = "/{id}")
     @PreAuthorize("hasAuthority('GUEST')")
     public ResponseEntity<ReservationDto> deleteReservation(@PathVariable("id") Long id) {
-        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account account = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         reservationService.deleteReservation(id, account.getId());
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -125,7 +126,7 @@ public class ReservationController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) ReservationStatus status
             ) {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         boolean isHost = currentUser.getRole() == AccountRole.HOST;
 
         ReservationSearchDto dto = ReservationSearchDto.builder()

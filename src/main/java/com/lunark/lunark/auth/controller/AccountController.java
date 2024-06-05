@@ -5,6 +5,7 @@ import com.lunark.lunark.auth.dto.AccountSignUpDto;
 import com.lunark.lunark.auth.dto.AccountUpdatePasswordDto;
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.auth.service.IAccountService;
 import com.lunark.lunark.auth.service.ICertificateRequestService;
 import com.lunark.lunark.auth.service.IVerificationService;
@@ -138,7 +139,7 @@ public class AccountController {
     @PostMapping(path="/favorites/{id}")
     @PreAuthorize("hasAuthority('GUEST')")
     public ResponseEntity<?> addPropertyToFavorites(@PathVariable("id") Long propertyId) {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         accountService.addToFavorites(currentUser.getId(), propertyService.find(propertyId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property not found")));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -146,7 +147,7 @@ public class AccountController {
     @DeleteMapping(path="/favorites/{id}")
     @PreAuthorize("hasAuthority('GUEST')")
     public ResponseEntity<?> removePropertyFromFavorites(@PathVariable("id") Long propertyId) {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         accountService.removeFromFavorites(currentUser.getId(), propertyService.find(propertyId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property not found")));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -154,7 +155,7 @@ public class AccountController {
     @GetMapping(value = "/favorites", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('GUEST')")
     public ResponseEntity<List<PropertyResponseDto>> getFavoriteProperties() {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         List<PropertyResponseDto> favoriteProperties = accountService.getFavoriteProperties(currentUser.getId()).stream()
                 .map(PropertyDtoMapper::fromPropertyToDto)
                 .toList();
@@ -165,7 +166,7 @@ public class AccountController {
     @PostMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST') or hasAuthority('ADMIN')")
     public ResponseEntity<?> saveProfileImage(@RequestParam("image") MultipartFile file) {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
 
         try {
             accountService.saveProfileImage(currentUser.getId(), file);
@@ -179,8 +180,8 @@ public class AccountController {
     @GetMapping(value = "/profile-image", produces = MediaType.IMAGE_JPEG_VALUE)
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST') or hasAuthority('ADMIN')")
     public ResponseEntity<byte[]> getProfileImage() {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Account account = accountService.find(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account not found"));
+        LdapAccount currentUser = (LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account account = accountService.find(currentUser.getUuid()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account not found"));
 
         byte[] profileImage = account.getProfileImage().getImageData();
 
@@ -201,7 +202,7 @@ public class AccountController {
     @PutMapping(value = "notifications", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
     public ResponseEntity<AccountDto> toggleNotifications(@RequestBody NotificationSettingsDto dto) {
-        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account account = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Account updatedAccount = this.accountService.toggleNotifications(account.getId(), dto.getType());
 
         AccountDto response = AccountDtoMapper.fromAccountToDTO(updatedAccount);
