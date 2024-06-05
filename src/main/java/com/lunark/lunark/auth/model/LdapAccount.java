@@ -6,8 +6,14 @@ import lombok.Data;
 import org.springframework.ldap.odm.annotations.Attribute;
 import org.springframework.ldap.odm.annotations.Entry;
 import org.springframework.ldap.odm.annotations.Id;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.naming.Name;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Entry(
@@ -17,7 +23,7 @@ import java.util.UUID;
         base = "dc=booking,ou=users,ou=system"
 )
 @Data
-public class LdapAccount {
+public class LdapAccount implements UserDetails {
 
     @Id
     private Name dn;
@@ -45,8 +51,6 @@ public class LdapAccount {
 
     @Attribute(name = "deleted")
     private boolean deleted;
-
-    // TODO: Check if role is needed in LDAP entity
 
     @Attribute(name = "notifyOnHostReview")
     private boolean notifyOnHostReview;
@@ -116,5 +120,38 @@ public class LdapAccount {
             this.setProfileImageData(account.getProfileImage().getImageData());
             this.setProfileImageMimeType(account.getProfileImage().getMimeType());
         }
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        AccountRole accountRole = AccountRole.fromInt(role);
+        grantedAuthorities.add(new SimpleGrantedAuthority(accountRole.toString()));
+        return grantedAuthorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !blocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

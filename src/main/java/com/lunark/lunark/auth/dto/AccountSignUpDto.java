@@ -46,17 +46,6 @@ public class AccountSignUpDto {
         this.role = role;
     }
 
-    public AccountSignUpDto(Account account) {
-        this.id = account.getId();
-        this.email = account.getEmail();
-        this.password = account.getPassword();
-        this.name = account.getName();
-        this.surname = account.getSurname();
-        this.address = account.getAddress();
-        this.phoneNumber = account.getPhoneNumber();
-        this.role = account.getRole().toString();
-    }
-
     public String getEmail() {
         return email;
     }

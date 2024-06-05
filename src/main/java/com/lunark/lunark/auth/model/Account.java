@@ -16,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
@@ -25,7 +26,7 @@ import java.util.*;
         + "WHERE id = ?")
 @Where(clause = "deleted = false")
 @Data
-public class Account implements UserDetails {
+public class Account implements Serializable {
     @Id
     private UUID id;
     @Column(name = "email", nullable = false, unique = true)
@@ -97,43 +98,6 @@ public class Account implements UserDetails {
         this.role = role;
         this.reviews = reviews;
         this.favoriteProperties = favoriteProperties;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        grantedAuthorities.add(new SimpleGrantedAuthority(role.toString()));
-        return grantedAuthorities;
-    }
-
-    @Override
-    public String getPassword() {
-        return null;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 
     public UUID getId() {
