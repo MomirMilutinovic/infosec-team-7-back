@@ -2,7 +2,9 @@ package com.lunark.lunark.moderation.service;
 
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.auth.service.IAccountService;
+import com.lunark.lunark.auth.service.ILdapAccountService;
 import com.lunark.lunark.exceptions.AccountNotFoundException;
 import com.lunark.lunark.moderation.model.AccountReport;
 import com.lunark.lunark.moderation.repository.IAccountReportRepository;
@@ -24,6 +26,9 @@ public class AccountReportService implements IAccountReportService {
 
     @Autowired
     private IAccountService accountService;
+
+    @Autowired
+    private ILdapAccountService ldapAccountService;
 
     @Autowired
     private IReservationService reservationService;
@@ -88,8 +93,9 @@ public class AccountReportService implements IAccountReportService {
     }
 
     private void blockAccount(Account account) {
-        // TODO: Block account in ldap or keycloak
-        accountService.saveAndFlush(account);
+        LdapAccount ldapAccount = ldapAccountService.find(account.getId()).orElseThrow(() -> new AccountNotFoundException("Account with the specified id does not exist"));
+        ldapAccount.setBlocked(true);
+        ldapAccountService.update(ldapAccount);
     }
 
     private void cancelAllResevations(List<Reservation> reservationList) {
