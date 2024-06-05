@@ -8,7 +8,6 @@ import com.lunark.lunark.auth.model.AccountRole;
 import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.auth.service.IAccountService;
 import com.lunark.lunark.auth.service.ICertificateRequestService;
-import com.lunark.lunark.auth.service.IVerificationService;
 import com.lunark.lunark.mapper.AccountDtoMapper;
 import com.lunark.lunark.mapper.PropertyDtoMapper;
 import com.lunark.lunark.notifications.dto.NotificationSettingsDto;
@@ -37,9 +36,6 @@ import java.util.stream.Collectors;
 public class AccountController {
     @Autowired
     IAccountService accountService;
-
-    @Autowired
-    IVerificationService verificationService;
 
     @Autowired
     ICertificateRequestService certificateRequestService;
@@ -124,16 +120,6 @@ public class AccountController {
                 passwordUpdateDto.getNewPassword());
         if (isUpdated) { return new ResponseEntity<>(HttpStatus.OK); }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-
-    // TODO: Delete me after keycloak account verification is added
-    @PostMapping(path="/verify/{verification_link_id}")
-    public ResponseEntity<?> verifyAccount(@PathVariable("verification_link_id") Long verificationLinkId) {
-        if (this.verificationService.verify(verificationLinkId)) {
-            return new ResponseEntity<>("Account verified successfully", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Verification link already used or expired", HttpStatus.BAD_REQUEST);
-        }
     }
 
     @PostMapping(path="/favorites/{id}")
