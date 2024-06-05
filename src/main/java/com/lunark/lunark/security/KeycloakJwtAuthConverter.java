@@ -93,7 +93,7 @@ public class KeycloakJwtAuthConverter implements Converter<Jwt, TokenBasedAuth> 
         }
 
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role))
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
     }
 

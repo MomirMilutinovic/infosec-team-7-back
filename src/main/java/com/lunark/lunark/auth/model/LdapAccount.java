@@ -72,6 +72,8 @@ public class LdapAccount {
     @Attribute(name = "userPassword")
     private String password;
 
+    @Attribute(name = "role")
+    private int role;
 
     public LdapAccount() {
     }
@@ -92,7 +94,7 @@ public class LdapAccount {
                 surname,
                 address,
                 phoneNumber,
-                AccountRole.GUEST,
+                AccountRole.fromInt(role),
                 null,
                 null
         );
