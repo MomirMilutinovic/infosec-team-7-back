@@ -5,7 +5,6 @@ import com.lunark.lunark.auth.model.AccountRole;
 import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.auth.model.ProfileImage;
 import com.lunark.lunark.auth.repository.IAccountRepository;
-import com.lunark.lunark.auth.repository.ILdapAccountRepository;
 import com.lunark.lunark.notifications.model.NotificationType;
 import com.lunark.lunark.properties.model.Property;
 import com.lunark.lunark.properties.service.IPropertyService;
@@ -72,9 +71,7 @@ public class AccountService implements IAccountService {
         return accountRepository.findByEmail(email);
     }
 
-    @Override
     public Account updateSql(Account account) {
-        // TODO: Update in LDAP
         Optional<Account> oldAccountOptional = accountRepository.findById(account.getId());
         if (oldAccountOptional.isEmpty()) {
             return null;
@@ -90,16 +87,15 @@ public class AccountService implements IAccountService {
         return accountRepository.saveAndFlush(account);
     }
 
-    public boolean updateLdap(Account account) {
-        // TODO: Make update have an effect on both ldap and sql, and remove this method
+    public Account update(Account account) {
         Optional<LdapAccount> ldapAccountOptional = ldapAccountService.find(account.getId());
         if (ldapAccountOptional.isEmpty()) {
-            return false;
+            return null;
         }
         LdapAccount ldapAccount = ldapAccountOptional.get();
         ldapAccount.copyFields(account);
         ldapAccountService.update(ldapAccount);
-        return true;
+        return updateSql(account);
     }
 
     @Override
@@ -256,7 +252,7 @@ public class AccountService implements IAccountService {
         account.get().setProfileImage(profileImage);
 
         accountRepository.save(account.get());
-        updateLdap(account.get());
+        update(account.get());
     }
 
     @Override

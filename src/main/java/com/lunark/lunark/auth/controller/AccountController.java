@@ -96,8 +96,7 @@ public class AccountController {
         }
         Account account = accountDto.toAccount();
         account.setId(id);
-        accountService.updateSql(account);
-        accountService.updateLdap(account);
+        accountService.update(account);
         return new ResponseEntity<>(modelMapper.map(account, AccountDto.class), HttpStatus.OK);
     }
 

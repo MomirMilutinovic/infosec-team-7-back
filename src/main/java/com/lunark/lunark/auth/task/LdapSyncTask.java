@@ -3,6 +3,7 @@ package com.lunark.lunark.auth.task;
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.auth.repository.ILdapAccountRepository;
+import com.lunark.lunark.auth.service.AccountService;
 import com.lunark.lunark.auth.service.IAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +17,7 @@ import java.util.Optional;
 public class LdapSyncTask {
 
     @Autowired
-    IAccountService accountService;
+    AccountService accountService;
 
     @Autowired
     ILdapAccountRepository ldapAccountRepository;
