@@ -139,11 +139,6 @@ phoneNumber: 1112233444
 role: 0
 verified: TRUE
 
-dn: dc=booking,ou=users,ou=system
-objectclass: domain
-objectclass: top
-dc: booking
-
 dn: cn=verifieduser2@example.com,dc=booking,ou=users,ou=system
 objectClass: bookingUser
 objectClass: top
