@@ -1,6 +1,7 @@
 package com.lunark.lunark.notifications.controller;
 
 import com.lunark.lunark.auth.model.Account;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.notifications.dto.NotificationResponseDto;
 import com.lunark.lunark.notifications.dto.UnreadNotificationCountDto;
 import com.lunark.lunark.notifications.model.Notification;
@@ -54,7 +55,7 @@ public class NotificationController implements ISubscriber {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
     public ResponseEntity<List<NotificationResponseDto>> findAllForCurrentUser() {
-        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account account = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Collection<Notification> notifications = notificationService.getAllNotifications(account.getId());
         List<NotificationResponseDto> notificationDtos = notifications.stream().map(notification -> modelMapper.map(notification, NotificationResponseDto.class)).collect(Collectors.toList());
         return new ResponseEntity<>(notificationDtos, HttpStatus.OK);
@@ -63,7 +64,7 @@ public class NotificationController implements ISubscriber {
     @MessageMapping("/notification/read")
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
     public String markNotificationAsRead(Long id) {
-        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account account = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Optional<Notification> notificationOptional = this.notificationService.findById(id);
         if (notificationOptional.isEmpty() && notificationOptional.get().getAccount() != account) {
             return "Could not mark notification as read";

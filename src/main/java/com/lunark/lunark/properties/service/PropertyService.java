@@ -145,7 +145,7 @@ public class PropertyService implements IPropertyService {
     }
 
     @Override
-    public List<Property> findAllPropertiesForHost(Long hostId) {
+    public List<Property> findAllPropertiesForHost(UUID hostId) {
         return propertyRepository.findAll().stream().filter(property -> Objects.equals(property.getHost().getId(), hostId)).toList();
     }
 

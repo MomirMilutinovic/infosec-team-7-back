@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.UUID;
 
 @Service
 public class ReportService implements IReportService {
@@ -21,7 +22,7 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public GeneralReport generateGeneralReport(LocalDate start, LocalDate end, Long hostId) {
+    public GeneralReport generateGeneralReport(LocalDate start, LocalDate end, UUID hostId) {
         Collection<DailyReport> dailyReports = reservationRepository.getDailyReports(start, end, hostId);
         Double totalProfit = dailyReports.stream().mapToDouble(report -> report.getProfit()).sum();
         Long totalReservationCount = dailyReports.stream().mapToLong(report -> report.getReservationCount()).sum();

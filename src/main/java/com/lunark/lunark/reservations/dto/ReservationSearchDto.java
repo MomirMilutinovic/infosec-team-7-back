@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -13,5 +14,5 @@ public class ReservationSearchDto {
     LocalDate startDate;
     LocalDate endDate;
     ReservationStatus status;
-    Long accountId;
+    UUID accountId;
 }

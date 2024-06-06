@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +55,7 @@ public class ReviewReportService implements IReviewReportService {
 
     private boolean isReportAuthorized(ReviewReport report) {
         Review reportedReview = report.getReview();
-        Long reporterId = report.getReporter().getId();
+        UUID reporterId = report.getReporter().getId();
         if (reportedReview.getType().equals(Review.ReviewType.HOST)) {
             return reportedReview.getHost().getId().equals(reporterId);
         } else if (reportedReview.getType().equals(Review.ReviewType.PROPERTY)) {

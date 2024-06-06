@@ -2,7 +2,9 @@ package com.lunark.lunark.moderation.service;
 
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.auth.service.IAccountService;
+import com.lunark.lunark.auth.service.ILdapAccountService;
 import com.lunark.lunark.exceptions.AccountNotFoundException;
 import com.lunark.lunark.moderation.model.AccountReport;
 import com.lunark.lunark.moderation.repository.IAccountReportRepository;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AccountReportService implements IAccountReportService {
@@ -23,6 +26,9 @@ public class AccountReportService implements IAccountReportService {
 
     @Autowired
     private IAccountService accountService;
+
+    @Autowired
+    private ILdapAccountService ldapAccountService;
 
     @Autowired
     private IReservationService reservationService;
@@ -63,7 +69,7 @@ public class AccountReportService implements IAccountReportService {
     }
 
     @Override
-    public boolean isGuestEligibleToReport(Account guest, Long hostId) {
+    public boolean isGuestEligibleToReport(Account guest, UUID hostId) {
         if (accountService.find(hostId).isEmpty()) {
             throw new AccountNotFoundException("Could not find host with given id");
         }
@@ -74,7 +80,7 @@ public class AccountReportService implements IAccountReportService {
     }
 
     @Override
-    public void block(Long id) {
+    public void block(UUID id) {
         Optional<Account> optionalAccount = accountService.find(id);
         if(optionalAccount.isPresent()) {
             Account account = optionalAccount.get();
@@ -87,8 +93,9 @@ public class AccountReportService implements IAccountReportService {
     }
 
     private void blockAccount(Account account) {
-        account.setBlocked(true);
-        accountService.saveAndFlush(account);
+        LdapAccount ldapAccount = ldapAccountService.find(account.getId()).orElseThrow(() -> new AccountNotFoundException("Account with the specified id does not exist"));
+        ldapAccount.setBlocked(true);
+        ldapAccountService.update(ldapAccount);
     }
 
     private void cancelAllResevations(List<Reservation> reservationList) {

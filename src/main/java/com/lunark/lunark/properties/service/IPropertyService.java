@@ -12,6 +12,7 @@ import com.lunark.lunark.properties.model.PropertyAvailabilityEntry;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IPropertyService {
     Collection<Property> findAll();
@@ -28,6 +29,6 @@ public interface IPropertyService {
     boolean changePricesAndAvailability(Long id, Collection<PropertyAvailabilityEntry> newPricesAndAvailability);
     List<Property> findByFilter(PropertySearchDto filter);
 
-    List<Property> findAllPropertiesForHost(Long hostId);
+    List<Property> findAllPropertiesForHost(UUID hostId);
     Property deleteImages(Long id);
 }

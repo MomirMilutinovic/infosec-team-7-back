@@ -13,10 +13,11 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Configurable(autowire = Autowire.BY_TYPE, dependencyCheck = true)
 @Component
-public class HostExistsConstraintValidator implements ConstraintValidator<HostExistsConstraint, Long> {
+public class HostExistsConstraintValidator implements ConstraintValidator<HostExistsConstraint, UUID> {
     @Autowired
     IAccountService accountService;
 
@@ -26,7 +27,7 @@ public class HostExistsConstraintValidator implements ConstraintValidator<HostEx
     }
 
     @Override
-    public boolean isValid(Long id, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(UUID id, ConstraintValidatorContext constraintValidatorContext) {
         Optional<Account> account = accountService.find(id);
         if (account.isEmpty() || !account.get().getRole().equals(AccountRole.HOST)) {
             return false;

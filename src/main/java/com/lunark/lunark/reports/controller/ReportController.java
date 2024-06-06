@@ -1,6 +1,7 @@
 package com.lunark.lunark.reports.controller;
 
 import com.lunark.lunark.auth.model.Account;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.reports.dto.GeneralReportResponseDto;
 import com.lunark.lunark.reports.dto.PropertyReportResponseDto;
 import com.lunark.lunark.reports.model.GeneralReport;
@@ -39,7 +40,7 @@ public class ReportController {
             @RequestParam LocalDate start,
             @RequestParam LocalDate end
             ) {
-        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account account = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
 
         GeneralReport result = reportService.generateGeneralReport(start, end, account.getId());
 

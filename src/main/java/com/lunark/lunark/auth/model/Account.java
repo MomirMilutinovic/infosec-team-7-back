@@ -16,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
@@ -25,14 +26,11 @@ import java.util.*;
         + "WHERE id = ?")
 @Where(clause = "deleted = false")
 @Data
-public class Account implements UserDetails {
+public class Account implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-    @Column
-    private String password;
     @Column
     private String name;
     @Column
@@ -42,11 +40,7 @@ public class Account implements UserDetails {
     @Column
     private String phoneNumber;
     @Column
-    private boolean verified;
-    @Column
     private AccountRole role;
-    @Column
-    private boolean blocked;
     @Embedded
     private ProfileImage profileImage;
 
@@ -94,74 +88,23 @@ public class Account implements UserDetails {
 
     }
 
-    public Account(Long id, String email, String password, String name, String surname, String address, String phoneNumber, boolean verified, AccountRole role, boolean notificationsEnabled, boolean blocked, Collection<Review> reviews, HashSet<Property> favoriteProperties) {
+    public Account(UUID id, String email, String name, String surname, String address, String phoneNumber, AccountRole role, Collection<Review> reviews, HashSet<Property> favoriteProperties) {
         this.id = id;
         this.email = email;
-        this.password = password;
         this.name = name;
         this.surname = surname;
         this.address = address;
         this.phoneNumber = phoneNumber;
-        this.verified = verified;
         this.role = role;
-        this.blocked = blocked;
         this.reviews = reviews;
         this.favoriteProperties = favoriteProperties;
     }
 
-    public void verify() {
-        verified = true;
-    }
-
-    public boolean canLogIn() {
-        return verified && !blocked;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        grantedAuthorities.add(new SimpleGrantedAuthority(role.toString()));
-        return grantedAuthorities;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return verified && !blocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    public boolean credentialsMatch(String email, String password) {
-        return this.email.equals(email) && this.email.equals(password);
-    }
-
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -171,10 +114,6 @@ public class Account implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getName() {
@@ -209,28 +148,12 @@ public class Account implements UserDetails {
         this.phoneNumber = phoneNumber;
     }
 
-    public boolean isVerified() {
-        return verified;
-    }
-
-    public void setVerified(boolean verified) {
-        this.verified = verified;
-    }
-
     public AccountRole getRole() {
         return role;
     }
 
     public void setRole(AccountRole role) {
         this.role = role;
-    }
-
-    public boolean isBlocked() {
-        return blocked;
-    }
-
-    public void setBlocked(boolean blocked) {
-        this.blocked = blocked;
     }
 
     public Collection<Review> getReviews() {

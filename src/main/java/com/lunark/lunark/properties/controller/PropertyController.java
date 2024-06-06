@@ -1,6 +1,7 @@
 package com.lunark.lunark.properties.controller;
 
 import com.lunark.lunark.auth.model.Account;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.mapper.PropertyDtoMapper;
 import com.lunark.lunark.properties.dto.AvailabilityEntryDto;
 import com.lunark.lunark.properties.dto.PropertyRequestDto;
@@ -32,6 +33,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -96,7 +98,7 @@ public class PropertyController {
 
     @GetMapping(value="/my-properties", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('HOST')")
-    public ResponseEntity<List<PropertyResponseDto>> getMyProperties(@RequestParam("hostId") @NotNull @PositiveOrZero Long hostId, SpringDataWebProperties pageable) {
+    public ResponseEntity<List<PropertyResponseDto>> getMyProperties(@RequestParam("hostId") @NotNull UUID hostId, SpringDataWebProperties pageable) {
         List<Property> myProperties = propertyService.findAllPropertiesForHost(hostId);
         List<PropertyResponseDto> propertyDtos = myProperties.stream() .map(PropertyDtoMapper::fromPropertyToDto) .toList();
         return new ResponseEntity<>(propertyDtos, HttpStatus.OK);
@@ -139,7 +141,7 @@ public class PropertyController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('HOST')")
     public ResponseEntity<PropertyResponseDto> createProperty(@RequestBody PropertyRequestDto propertyDto) {
-        Account host = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account host = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Property property = propertyService.create(propertyDtoMapper.fromDtoToProperty(propertyDto, host.getId()));
         PropertyResponseDto response = PropertyDtoMapper.fromPropertyToDto(property);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -148,7 +150,7 @@ public class PropertyController {
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('HOST')")
     public ResponseEntity<PropertyResponseDto> updateProperty(@RequestBody @Valid PropertyRequestDto propertyDto) {
-        Account host = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account host = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Property property = propertyDtoMapper.fromDtoToProperty(propertyDto, host.getId());
         if (this.propertyService.find(property.getId()).isEmpty())  {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

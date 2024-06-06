@@ -1,10 +1,11 @@
 package com.lunark.lunark.moderation.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record ReviewReportRequestDto(
         LocalDateTime date,
-        Long reporterId,
+        UUID reporterId,
         Long reviewId
 ) {
 }

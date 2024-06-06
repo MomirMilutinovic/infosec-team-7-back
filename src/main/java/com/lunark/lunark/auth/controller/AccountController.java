@@ -5,15 +5,14 @@ import com.lunark.lunark.auth.dto.AccountSignUpDto;
 import com.lunark.lunark.auth.dto.AccountUpdatePasswordDto;
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.AccountRole;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.auth.service.IAccountService;
 import com.lunark.lunark.auth.service.ICertificateRequestService;
-import com.lunark.lunark.auth.service.IVerificationService;
 import com.lunark.lunark.mapper.AccountDtoMapper;
 import com.lunark.lunark.mapper.PropertyDtoMapper;
 import com.lunark.lunark.notifications.dto.NotificationSettingsDto;
 import com.lunark.lunark.properties.dto.PropertyResponseDto;
 import com.lunark.lunark.properties.service.IPropertyService;
-import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
@@ -26,10 +25,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.print.attribute.standard.Media;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,9 +36,6 @@ import java.util.stream.Collectors;
 public class AccountController {
     @Autowired
     IAccountService accountService;
-
-    @Autowired
-    IVerificationService verificationService;
 
     @Autowired
     ICertificateRequestService certificateRequestService;
@@ -51,7 +47,7 @@ public class AccountController {
     ModelMapper modelMapper;
 
     @GetMapping(path="/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDto> getAccount(@PathVariable("id") Long id) {
+    public ResponseEntity<AccountDto> getAccount(@PathVariable("id") UUID id) {
         Optional<Account> account = accountService.find(id);
         if (account.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -61,18 +57,10 @@ public class AccountController {
     }
 
     @GetMapping(value ="/average/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Double> getAverageGrade(@PathVariable("id") Long id) {
+    public ResponseEntity<Double> getAverageGrade(@PathVariable("id") UUID id) {
         Double averageGrade = accountService.getAverageGrade(id);
         if (averageGrade == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(averageGrade, HttpStatus.OK);
-    }
-
-    @PostMapping(path="", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDto> createAccount(@Valid @RequestBody AccountSignUpDto accountDto) {
-        Account newAccount = accountDto.toAccount();
-        Account account = accountService.create(newAccount);
-        verificationService.createVerificationLink(account);
-        return new ResponseEntity<>(modelMapper.map(account, AccountDto.class), HttpStatus.CREATED);
     }
 
     @GetMapping(path="/nonadmins", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,7 +72,7 @@ public class AccountController {
 
     @DeleteMapping(path="/{id}")
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
-    public ResponseEntity<AccountDto> deleteAccount(@PathVariable("id") Long id) {
+    public ResponseEntity<AccountDto> deleteAccount(@PathVariable("id") UUID id) {
         if(accountService.find(id).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -98,14 +86,13 @@ public class AccountController {
 
     @PutMapping(path="/{id}")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GUEST') or hasAuthority('HOST')")
-    public ResponseEntity<AccountDto> updateAccount(@RequestBody AccountSignUpDto accountDto, @PathVariable("id") Long id) {
+    public ResponseEntity<AccountDto> updateAccount(@RequestBody AccountSignUpDto accountDto, @PathVariable("id") UUID id) {
         Optional<Account> accountOptional = accountService.find(id);
         if(accountOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Account account = accountDto.toAccount();
         account.setId(id);
-        account.setVerified(accountOptional.get().isVerified());
         accountService.update(account);
         return new ResponseEntity<>(modelMapper.map(account, AccountDto.class), HttpStatus.OK);
     }
@@ -135,25 +122,10 @@ public class AccountController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping(path="/verify/{verification_link_id}")
-    public ResponseEntity<?> verifyAccount(@PathVariable("verification_link_id") Long verificationLinkId) {
-        if (this.verificationService.verify(verificationLinkId)) {
-            return new ResponseEntity<>("Account verified successfully", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Verification link already used or expired", HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PostMapping(value = "/block/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> blockAccount(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
     @PostMapping(path="/favorites/{id}")
     @PreAuthorize("hasAuthority('GUEST')")
     public ResponseEntity<?> addPropertyToFavorites(@PathVariable("id") Long propertyId) {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         accountService.addToFavorites(currentUser.getId(), propertyService.find(propertyId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property not found")));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -161,7 +133,7 @@ public class AccountController {
     @DeleteMapping(path="/favorites/{id}")
     @PreAuthorize("hasAuthority('GUEST')")
     public ResponseEntity<?> removePropertyFromFavorites(@PathVariable("id") Long propertyId) {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         accountService.removeFromFavorites(currentUser.getId(), propertyService.find(propertyId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property not found")));
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -169,7 +141,7 @@ public class AccountController {
     @GetMapping(value = "/favorites", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('GUEST')")
     public ResponseEntity<List<PropertyResponseDto>> getFavoriteProperties() {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         List<PropertyResponseDto> favoriteProperties = accountService.getFavoriteProperties(currentUser.getId()).stream()
                 .map(PropertyDtoMapper::fromPropertyToDto)
                 .toList();
@@ -180,7 +152,7 @@ public class AccountController {
     @PostMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST') or hasAuthority('ADMIN')")
     public ResponseEntity<?> saveProfileImage(@RequestParam("image") MultipartFile file) {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account currentUser = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
 
         try {
             accountService.saveProfileImage(currentUser.getId(), file);
@@ -194,8 +166,8 @@ public class AccountController {
     @GetMapping(value = "/profile-image", produces = MediaType.IMAGE_JPEG_VALUE)
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST') or hasAuthority('ADMIN')")
     public ResponseEntity<byte[]> getProfileImage() {
-        Account currentUser = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Account account = accountService.find(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account not found"));
+        LdapAccount currentUser = (LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account account = accountService.find(currentUser.getUuid()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account not found"));
 
         byte[] profileImage = account.getProfileImage().getImageData();
 
@@ -203,7 +175,7 @@ public class AccountController {
     }
 
     @GetMapping(value = "/{id}/profile-image", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> getProfileImage(@PathVariable("id") Long userId) {
+    public ResponseEntity<byte[]> getProfileImage(@PathVariable("id") UUID userId) {
         Optional<Account> account = this.accountService.find(userId);
         if (account.isEmpty() || account.get().getProfileImage() == null) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -216,7 +188,7 @@ public class AccountController {
     @PutMapping(value = "notifications", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
     public ResponseEntity<AccountDto> toggleNotifications(@RequestBody NotificationSettingsDto dto) {
-        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account account = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Account updatedAccount = this.accountService.toggleNotifications(account.getId(), dto.getType());
 
         AccountDto response = AccountDtoMapper.fromAccountToDTO(updatedAccount);

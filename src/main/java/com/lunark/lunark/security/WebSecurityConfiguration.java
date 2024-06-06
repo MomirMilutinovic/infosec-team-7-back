@@ -16,7 +16,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -29,14 +28,14 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration {
 
-    private final TokenFilter jwtRequestFilter;
     private final TokenEntryPoint tokenEntryPoint;
     private final MvcRequestMatcher.Builder mvcMatcherBuilder;
+    private final KeycloakJwtAuthConverter keycloakJwtAuthConverter;
 
     @Autowired
     @Lazy
-    public WebSecurityConfiguration(TokenFilter jwtRequestFilter, TokenEntryPoint tokenEntryPoint, HandlerMappingIntrospector introspector) {
-        this.jwtRequestFilter = jwtRequestFilter;
+    public WebSecurityConfiguration(KeycloakJwtAuthConverter keycloakJwtAuthConverter, TokenEntryPoint tokenEntryPoint, HandlerMappingIntrospector introspector) {
+        this.keycloakJwtAuthConverter = keycloakJwtAuthConverter;
         this.tokenEntryPoint = tokenEntryPoint;
         mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
     }
@@ -61,7 +60,6 @@ public class WebSecurityConfiguration {
         http.securityContext((securityContext) -> securityContext
                 .securityContextRepository(new RequestAttributeSecurityContextRepository())
         );
-
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(tokenEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -72,9 +70,11 @@ public class WebSecurityConfiguration {
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/**")).permitAll()
                 .anyRequest().authenticated()
                 );
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        http.oauth2ResourceServer((oauth2) -> oauth2
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtAuthConverter)));
         return http.build();
     }
+
     @Bean
     public BCryptPasswordEncoder encodePassword() {
         return new BCryptPasswordEncoder();

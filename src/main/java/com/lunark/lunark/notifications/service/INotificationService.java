@@ -8,9 +8,10 @@ import com.lunark.lunark.reviews.model.Review;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface INotificationService {
-    Collection<Notification> getAllNotifications(Long accountId);
+    Collection<Notification> getAllNotifications(UUID accountId);
     Notification create(Notification notification);
 
     Notification createNotification(Review review);

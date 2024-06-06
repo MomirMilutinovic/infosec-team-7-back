@@ -1,6 +1,7 @@
 package com.lunark.lunark.reviews.controller;
 
 import com.lunark.lunark.auth.model.Account;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.mapper.ReviewDtoMapper;
 import com.lunark.lunark.reviews.dto.*;
 import com.lunark.lunark.reviews.model.Review;
@@ -23,6 +24,7 @@ import java.time.Clock;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -50,7 +52,7 @@ public class ReviewController {
     }
 
     @GetMapping(value = "/host/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<ReviewDto>> getReviewForHost(@PathVariable("id") @NotNull @PositiveOrZero Long id) {
+    public ResponseEntity<Collection<ReviewDto>> getReviewForHost(@PathVariable("id") @NotNull UUID id) {
         Collection<Review> reviews = reviewService.getAllReviewsForHost(id);
         if(reviews == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -70,7 +72,7 @@ public class ReviewController {
     @PreAuthorize("hasAuthority('GUEST')")
     @PostMapping(value = "/property/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReviewDto> createPropertyReview(@Valid @RequestBody ReviewRequestDto reviewDto, @PathVariable(value = "id") @NotNull @PositiveOrZero Long id) {
-        Account guest = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account guest = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         if (!this.reviewService.guestEligibleToReviewProperty(guest.getId(), id)) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
@@ -81,8 +83,8 @@ public class ReviewController {
 
     @PreAuthorize("hasAuthority('GUEST')")
     @PostMapping(value = "/host/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ReviewDto> createHostReview(@Valid @RequestBody ReviewRequestDto reviewDto, @PathVariable(value = "id") @NotNull @PositiveOrZero Long id) {
-        Account guest = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public ResponseEntity<ReviewDto> createHostReview(@Valid @RequestBody ReviewRequestDto reviewDto, @PathVariable(value = "id") @NotNull UUID id) {
+        Account guest = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         if (!this.reviewService.guestEligibleToReviewHost(guest.getId(), id)) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
@@ -95,7 +97,7 @@ public class ReviewController {
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasAuthority('GUEST')")
     public ResponseEntity<Review> deleteReview(@PathVariable("id") @NotNull @PositiveOrZero Long id){
-        Account guest = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account guest = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         if (reviewService.find(id).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -150,7 +152,7 @@ public class ReviewController {
     public ResponseEntity<PropertyReviewEligibilityDto> checkEligibilityToReviewProperty(@PathVariable("id") @NotNull @PositiveOrZero Long id) {
         Account guest;
         try {
-            guest = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            guest = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         } catch (ClassCastException e) {
             return new ResponseEntity<>(new PropertyReviewEligibilityDto(false, null, id), HttpStatus.OK);
         }
@@ -159,10 +161,10 @@ public class ReviewController {
     }
 
     @GetMapping(value = "host-review-eligibility/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<HostReviewEligibilityDto> checkEligibilityToReviewHost(@PathVariable("id") @NotNull @PositiveOrZero Long id) {
+    public ResponseEntity<HostReviewEligibilityDto> checkEligibilityToReviewHost(@PathVariable("id") @NotNull UUID id) {
         Account guest;
         try {
-            guest = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            guest = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         } catch (ClassCastException e) {
             return new ResponseEntity<>(new HostReviewEligibilityDto(false, null, id), HttpStatus.OK);
         }

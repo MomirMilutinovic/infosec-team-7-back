@@ -25,6 +25,18 @@ public enum AccountRole implements GrantedAuthority {
         throw new IllegalArgumentException("Invalid string in account role");
     }
 
+    public static AccountRole fromInt(int value) {
+        switch (value) {
+            case 0:
+                return AccountRole.GUEST;
+            case 1:
+                return AccountRole.HOST;
+            case 2:
+                return AccountRole.ADMIN;
+        }
+        throw new IllegalArgumentException("Invalid int in account role");
+    }
+
     @Override
     public String toString() {
         return this.name;

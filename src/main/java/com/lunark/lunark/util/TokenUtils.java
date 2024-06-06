@@ -10,7 +10,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.function.Function;
 
@@ -33,17 +35,40 @@ public class TokenUtils {
 
     private AccountService accountService;
 
+    private final PublicKey publicKey;
+
+    public TokenUtils(@Value("${token-utils.public-key}") String publicKeyEncoded) {
+        this.publicKey = parseKey(publicKeyEncoded);
+    }
+
+    public static PublicKey parseKey(String key){
+        try{
+            byte[] byteKey = Base64.getDecoder().decode(key);
+            X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+
+            return kf.generatePublic(X509publicKey);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
     public<T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
+
+        return Jwts.parser().setSigningKey(this.publicKey).parseClaimsJws(token).getBody();
     }
 
     public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+        return getClaimFromToken(token, claims -> claims.get("preferred_username", String.class));
     }
 
     public String getAudienceFromToken(String token) {
@@ -63,30 +88,11 @@ public class TokenUtils {
         return expiration.before(new Date());
     }
 
-    public String generateToken(Account userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", userDetails.getAuthorities());
-        claims.put("profileId", userDetails.getId());
-        return doGenerateToken(claims, userDetails.getUsername());
-    }
-
-    private String doGenerateToken(Map<String, Object> claims, String username) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, SECRET).compact();
-    }
-
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    public int getExpiredIn() {
-        return (int) JWT_TOKEN_VALIDITY;
-    }
     public String getToken(HttpServletRequest request) {
         String authHeader = getAuthHeaderFromHeader(request);
 

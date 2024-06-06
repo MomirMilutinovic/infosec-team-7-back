@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -52,7 +53,7 @@ public class PropertyDtoMapper {
         return property;
     }
 
-    public Property fromDtoToProperty(PropertyRequestDto propertyRequestDto, Long hostId) {
+    public Property fromDtoToProperty(PropertyRequestDto propertyRequestDto, UUID hostId) {
         propertyRequestDto.setHostId(hostId);
         return this.fromDtoToProperty(propertyRequestDto);
     }

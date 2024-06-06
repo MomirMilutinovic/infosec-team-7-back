@@ -1,6 +1,7 @@
 package com.lunark.lunark.moderation.controller;
 
 import com.lunark.lunark.auth.model.Account;
+import com.lunark.lunark.auth.model.LdapAccount;
 import com.lunark.lunark.exceptions.AccountNotFoundException;
 import com.lunark.lunark.mapper.AccountReportDtoMapper;
 import com.lunark.lunark.moderation.dto.AccountReportRequestDto;
@@ -10,6 +11,7 @@ import com.lunark.lunark.moderation.model.AccountReport;
 import com.lunark.lunark.moderation.service.IAccountReportService;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -56,7 +59,7 @@ public class AccountReportController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
     public ResponseEntity<AccountReportResponseDto> createReport(@Valid @RequestBody AccountReportRequestDto reportRequestDto) throws ConstraintViolationException {
-        Account reporter = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Account reporter = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         AccountReport report;
         try {
             report = accountReportDtoMapper.toAccountReport(reportRequestDto, reporter);
@@ -80,8 +83,8 @@ public class AccountReportController {
 
     @GetMapping(value = "/host-report-eligibility/{hostId}")
     @PreAuthorize("hasAuthority('GUEST')")
-    public ResponseEntity<HostReportEligibilityDto> isCurrentGuestEligibleToReport(@PathVariable("hostId") @PositiveOrZero Long hostId) {
-        Account reporter = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public ResponseEntity<HostReportEligibilityDto> isCurrentGuestEligibleToReport(@PathVariable("hostId") @NotNull UUID hostId) {
+        Account reporter = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         boolean eligible = accountReportService.isGuestEligibleToReport(reporter, hostId);
         return new ResponseEntity<>(new HostReportEligibilityDto(hostId, eligible), HttpStatus.OK);
     }

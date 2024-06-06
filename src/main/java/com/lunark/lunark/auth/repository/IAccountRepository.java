@@ -8,10 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface IAccountRepository extends JpaRepository<Account, Long> {
-    List<Account> findAll();
-    Optional<Account> findById(Long id);
-    Optional<Account> findByEmailAndPassword(String email, String password);
+public interface IAccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findByEmail(String email);
 }
