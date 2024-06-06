@@ -10478,6 +10478,11 @@ phoneNumber: 2223334444
 role: 2
 verified: TRUE
 
+dn: ou=consumers,ou=system
+objectclass: organizationalUnit
+objectclass: top
+ou: consumers
+
 dn: cn=blockeduser@example.com,dc=booking,ou=users,ou=system
 objectClass: bookingUser
 objectClass: top
@@ -18044,9 +18049,3 @@ notifyOnReservationRequestResponse: TRUE
 phoneNumber: 3332221111
 role: 0
 verified: TRUE
-
-dn: ou=users,ou=system
-objectClass: organizationalUnit
-objectClass: top
-ou: users
-

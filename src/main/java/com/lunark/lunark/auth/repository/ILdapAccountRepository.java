@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface ILdapAccountRepository extends LdapRepository<LdapAccount> {
     Optional<LdapAccount> findByUuid(UUID uuid);
     Optional<LdapAccount> findByEmail(String email);
+    void deleteByUuid(UUID uuid);
 }

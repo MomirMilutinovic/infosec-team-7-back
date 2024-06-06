@@ -31,4 +31,9 @@ public class LdapAccountService implements ILdapAccountService {
         }
         return ldapAccountRepository.save(account);
     }
+
+    @Override
+    public void delete(UUID id) {
+        ldapAccountRepository.deleteByUuid(id);
+    }
 }

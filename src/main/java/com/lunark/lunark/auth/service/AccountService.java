@@ -115,6 +115,7 @@ public class AccountService implements IAccountService {
             handleHostAccountDeletion(id, propertiesList);
         }
         accountRepository.deleteById(id);
+        ldapAccountService.delete(id);
         return true;
     }
 
