@@ -175,7 +175,6 @@ public class AccountService implements IAccountService {
     }
 
     private boolean isOldPasswordCorrect(LdapAccount account, String oldPassword) {
-        // TODO: Check password from LDAP
         Hashtable<String, String> environment = new Hashtable<>();
 
         environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
