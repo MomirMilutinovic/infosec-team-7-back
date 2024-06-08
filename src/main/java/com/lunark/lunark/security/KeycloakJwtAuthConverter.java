@@ -15,12 +15,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,17 +47,18 @@ public class KeycloakJwtAuthConverter implements Converter<Jwt, TokenBasedAuth> 
 
     @Override
     public TokenBasedAuth convert(@NonNull Jwt jwt) {
-        Collection<GrantedAuthority> authorities =
+        return getAuthentication(jwt.getTokenValue());
+    }
+
+    public TokenBasedAuth getAuthentication(String authToken) {
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey((RSAPublicKey) tokenUtils.getPublicKey()).signatureAlgorithm(SignatureAlgorithm.RS256).build();
+        Jwt jwt = jwtDecoder.decode(authToken);
+        Collection<GrantedAuthority> permissions =
                 Stream.concat(
                                 jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
                                 extractResourceRoles(jwt).stream()
                         )
                         .collect(Collectors.toSet());
-
-        return getAuthentication(jwt.getTokenValue());
-    }
-
-    public TokenBasedAuth getAuthentication(String authToken) {
         String username;
         try {
             if (authToken != null) {
@@ -65,7 +69,7 @@ public class KeycloakJwtAuthConverter implements Converter<Jwt, TokenBasedAuth> 
                         throw new LockedException("Account is locked");
                     }
                     if (tokenUtils.validateToken(authToken, userDetails)) {
-                        TokenBasedAuth authentication = new TokenBasedAuth(userDetails);
+                        TokenBasedAuth authentication = new TokenBasedAuth(userDetails, permissions);
                         authentication.setToken(authToken);
                         return authentication;
                     }

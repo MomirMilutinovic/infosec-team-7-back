@@ -41,6 +41,10 @@ public class TokenUtils {
         this.publicKey = parseKey(publicKeyEncoded);
     }
 
+    public PublicKey getPublicKey() {
+        return this.publicKey;
+    }
+
     public static PublicKey parseKey(String key){
         try{
             byte[] byteKey = Base64.getDecoder().decode(key);
