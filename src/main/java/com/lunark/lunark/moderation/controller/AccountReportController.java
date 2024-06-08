@@ -2,7 +2,6 @@ package com.lunark.lunark.moderation.controller;
 
 import com.lunark.lunark.auth.model.Account;
 import com.lunark.lunark.auth.model.LdapAccount;
-import com.lunark.lunark.exceptions.AccountNotFoundException;
 import com.lunark.lunark.mapper.AccountReportDtoMapper;
 import com.lunark.lunark.moderation.dto.AccountReportRequestDto;
 import com.lunark.lunark.moderation.dto.AccountReportResponseDto;
@@ -40,6 +39,7 @@ public class AccountReportController {
     AccountReportDtoMapper accountReportDtoMapper;
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('read_report')")
     public ResponseEntity<AccountReportResponseDto> getAccountReport(@PathVariable("id") @PositiveOrZero Long id) {
         return accountReportService.getById(id)
                 .map(accountReport -> ResponseEntity.ok(modelMapper.map(accountReport, AccountReportResponseDto.class)))
@@ -47,6 +47,7 @@ public class AccountReportController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('read_report')")
     public ResponseEntity<List<AccountReportResponseDto>> getAll() {
         List<AccountReport> accountReports = accountReportService.getAll();
         List<AccountReportResponseDto> reportResponseDtos = accountReports.stream()
@@ -57,7 +58,7 @@ public class AccountReportController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('report_user')")
     public ResponseEntity<AccountReportResponseDto> createReport(@Valid @RequestBody AccountReportRequestDto reportRequestDto) throws ConstraintViolationException {
         Account reporter = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         AccountReport report;
@@ -71,9 +72,10 @@ public class AccountReportController {
         }
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<AccountReportResponseDto> block(@PathVariable @PositiveOrZero Long id) {
-        Optional<AccountReport> report = accountReportService.getById(id);
+    @DeleteMapping(value = "/{reportId}")
+    @PreAuthorize("hasAuthority('block_user')")
+    public ResponseEntity<AccountReportResponseDto> block(@PathVariable @PositiveOrZero Long reportId) {
+        Optional<AccountReport> report = accountReportService.getById(reportId);
         if (report.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -82,7 +84,7 @@ public class AccountReportController {
     }
 
     @GetMapping(value = "/host-report-eligibility/{hostId}")
-    @PreAuthorize("hasAuthority('GUEST')")
+    @PreAuthorize("hasAuthority('report_user')")
     public ResponseEntity<HostReportEligibilityDto> isCurrentGuestEligibleToReport(@PathVariable("hostId") @NotNull UUID hostId) {
         Account reporter = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         boolean eligible = accountReportService.isGuestEligibleToReport(reporter, hostId);
