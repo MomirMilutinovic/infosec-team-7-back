@@ -1,7 +1,10 @@
 package com.lunark.lunark.security;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 
 public class TokenBasedAuth extends AbstractAuthenticationToken {
 
@@ -9,8 +12,8 @@ public class TokenBasedAuth extends AbstractAuthenticationToken {
 
     private final UserDetails principle;
 
-    public TokenBasedAuth(UserDetails principle) {
-        super(principle.getAuthorities());
+    public TokenBasedAuth(UserDetails principle, Collection<GrantedAuthority> permissions) {
+        super(permissions);
         this.principle = principle;
     }
 

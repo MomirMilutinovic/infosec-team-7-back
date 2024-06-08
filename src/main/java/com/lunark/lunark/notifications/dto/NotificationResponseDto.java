@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -14,6 +15,6 @@ public class NotificationResponseDto {
     private String text;
     private ZonedDateTime date;
     private boolean read;
-    private Long accountId;
+    private UUID accountId;
     private String type;
 }

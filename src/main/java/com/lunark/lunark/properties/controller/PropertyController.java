@@ -89,7 +89,7 @@ public class PropertyController {
     }
 
     @GetMapping(value="/unapproved", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('read_unapproved_properites')")
     public ResponseEntity<List<PropertyResponseDto>> getAllUnapproved(SpringDataWebProperties pageable) {
         List<Property> unapprovedProperties = propertyService.findUnapproved();
         List<PropertyResponseDto> propertyDtos = unapprovedProperties.stream() .map(PropertyDtoMapper::fromPropertyToDto) .toList();
@@ -97,7 +97,7 @@ public class PropertyController {
     }
 
     @GetMapping(value="/my-properties", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('write_property')")
     public ResponseEntity<List<PropertyResponseDto>> getMyProperties(@RequestParam("hostId") @NotNull UUID hostId, SpringDataWebProperties pageable) {
         List<Property> myProperties = propertyService.findAllPropertiesForHost(hostId);
         List<PropertyResponseDto> propertyDtos = myProperties.stream() .map(PropertyDtoMapper::fromPropertyToDto) .toList();
@@ -139,7 +139,7 @@ public class PropertyController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('write_property')")
     public ResponseEntity<PropertyResponseDto> createProperty(@RequestBody PropertyRequestDto propertyDto) {
         Account host = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Property property = propertyService.create(propertyDtoMapper.fromDtoToProperty(propertyDto, host.getId()));
@@ -148,7 +148,7 @@ public class PropertyController {
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('write_property')")
     public ResponseEntity<PropertyResponseDto> updateProperty(@RequestBody @Valid PropertyRequestDto propertyDto) {
         Account host = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Property property = propertyDtoMapper.fromDtoToProperty(propertyDto, host.getId());
@@ -165,9 +165,8 @@ public class PropertyController {
     }
 
     @DeleteMapping(value = "/{id}")
-    @PreAuthorize("hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('write_property')")
     public ResponseEntity<PropertyResponseDto> deleteProperty(@PathVariable("id") @NotNull @PositiveOrZero Long id) {
-        // TODO: add service calls
         if (this.propertyService.find(id).isEmpty())  {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -176,7 +175,7 @@ public class PropertyController {
     }
 
     @PostMapping("/approve/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('approve_property')")
     public ResponseEntity<Property> approveProperty(@PathVariable @NotNull @PositiveOrZero Long id) {
         return propertyService.find(id)
                 .map(this::approveAndSaveProperty)
@@ -207,7 +206,7 @@ public class PropertyController {
     }
 
     @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('write_property')")
     public ResponseEntity<?> uploadImage(@PathVariable("id") @NotNull @PositiveOrZero Long id, @RequestParam("image") MultipartFile file) {
         Optional<Property> property = propertyService.find(id);
 

@@ -35,7 +35,7 @@ public class ReportController {
     }
 
     @GetMapping("/general")
-    @PreAuthorize("hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('read_property_income_reports')")
     public ResponseEntity<GeneralReportResponseDto> generateGeneralReport(
             @RequestParam LocalDate start,
             @RequestParam LocalDate end
@@ -48,7 +48,7 @@ public class ReportController {
     }
 
     @GetMapping("/property")
-    @PreAuthorize("hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('read_property_income_reports')")
     public ResponseEntity<PropertyReportResponseDto> generatePropertyReport(
             @RequestParam Integer year,
             @RequestParam Long propertyId

@@ -69,8 +69,8 @@ public class ReviewController {
         return new ResponseEntity<>(reviews.stream().map(ReviewDtoMapper::toDto).collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('GUEST')")
     @PostMapping(value = "/property/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('write_review')")
     public ResponseEntity<ReviewDto> createPropertyReview(@Valid @RequestBody ReviewRequestDto reviewDto, @PathVariable(value = "id") @NotNull @PositiveOrZero Long id) {
         Account guest = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         if (!this.reviewService.guestEligibleToReviewProperty(guest.getId(), id)) {
@@ -81,8 +81,8 @@ public class ReviewController {
         return new ResponseEntity<>(ReviewDtoMapper.toDto(review), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('GUEST')")
     @PostMapping(value = "/host/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('write_review')")
     public ResponseEntity<ReviewDto> createHostReview(@Valid @RequestBody ReviewRequestDto reviewDto, @PathVariable(value = "id") @NotNull UUID id) {
         Account guest = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         if (!this.reviewService.guestEligibleToReviewHost(guest.getId(), id)) {
@@ -95,7 +95,7 @@ public class ReviewController {
 
 
     @DeleteMapping(value = "/{id}")
-    @PreAuthorize("hasAuthority('GUEST')")
+    @PreAuthorize("hasAuthority('write_review')")
     public ResponseEntity<Review> deleteReview(@PathVariable("id") @NotNull @PositiveOrZero Long id){
         Account guest = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         if (reviewService.find(id).isEmpty()) {
@@ -109,6 +109,7 @@ public class ReviewController {
     }
 
     @PutMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('write_review')")
     public ResponseEntity<Review> updateReview(@Valid @RequestBody ReviewDto reviewDto, @PathVariable("id") @NotNull @PositiveOrZero Long id) {
         Optional<Review> existingReview = reviewService.find(id);
         if(existingReview.isEmpty()) {
@@ -125,7 +126,7 @@ public class ReviewController {
 
 
     @GetMapping(path="/unapproved", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('read_unapproved_reviews')")
     public ResponseEntity<List<ReviewDto>> getUnapprovedReviews(SpringDataWebProperties.Pageable pageable) {
         List<Review> unapprovedReviews = reviewService.findAllUnapproved().stream().toList();
         List<ReviewDto> reviewDtos = unapprovedReviews.stream().map(ReviewDtoMapper::toDto).toList();
@@ -133,7 +134,7 @@ public class ReviewController {
     }
 
     @PostMapping(value = "/{id}/approve", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('approve_review')")
     public ResponseEntity<ReviewApprovalDto> approveReview(@PathVariable("id") @NotNull @PositiveOrZero Long id) {
         Optional<Review> existingReview = reviewService.find(id);
         if(existingReview.isEmpty()) {
