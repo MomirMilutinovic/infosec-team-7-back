@@ -53,7 +53,7 @@ public class NotificationController implements ISubscriber {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('read_notifications')")
     public ResponseEntity<List<NotificationResponseDto>> findAllForCurrentUser() {
         Account account = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Collection<Notification> notifications = notificationService.getAllNotifications(account.getId());
@@ -62,7 +62,7 @@ public class NotificationController implements ISubscriber {
     }
 
     @MessageMapping("/notification/read")
-    @PreAuthorize("hasAuthority('GUEST') or hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('read_notifications')")
     public String markNotificationAsRead(Long id) {
         Account account = ((LdapAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).toAccount();
         Optional<Notification> notificationOptional = this.notificationService.findById(id);
@@ -71,11 +71,6 @@ public class NotificationController implements ISubscriber {
         }
         this.notificationService.markAsRead(id);
         return "Notification " + id + " marked as read";
-    }
-
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<NotificationResponseDto> delete(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
