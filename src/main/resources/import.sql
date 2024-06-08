@@ -18,10 +18,10 @@ INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (5, 'Amazing property!', true, '2023-02-15T15:45:00', 1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a04');
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (3, 'Average experience', true, '2023-03-20T10:15:00', 0, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a05');
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (5, 'Highly recommended!', true, '2023-04-25T08:00:00', 1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a06');
-INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (2, 'Not satisfied', false, '2023-05-30T18:20:00', 0, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a07');
+INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (2, 'Not satisfied', false, '2023-05-30T18:20:00', 1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a07');
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (4, 'Enjoyed my stay', true, '2023-06-05T22:00:00', 1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a08');
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (5, 'Fantastic host!', true, '2023-07-12T09:30:00', 0, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01');
-INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (3, 'Needs improvement', false, '2023-08-18T14:10:00', 1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a04');
+INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (3, 'Needs improvement', false, '2023-08-18T14:10:00', 0, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a04');
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (4, 'Responsive host', true, '2023-09-22T17:00:00', 0, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a05');
 INSERT INTO Review (rating, description, approved, date, type, author_id) VALUES (5, 'Beautiful property', true, '2023-10-28T20:45:00', 1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a06');
 
