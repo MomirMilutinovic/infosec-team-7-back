@@ -33,12 +33,14 @@ public class ReviewReportController {
     ReviewReportDtoMapper reviewReportDtoMapper;
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('read_report')")
     public ResponseEntity<ReviewReport> getReviewReport(@PathVariable("id") Long id) {
         ReviewReport reviewReport = reviewReportService.getById(id);
         return reviewReport != null ? new ResponseEntity<>(reviewReport, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('read_report')")
     public ResponseEntity<List<ReviewReportResponseDto>> getAll() {
         List<ReviewReport> reviewReports = reviewReportService.getAll();
         List<ReviewReportResponseDto> reportDtos = reviewReports.stream()
@@ -49,7 +51,7 @@ public class ReviewReportController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAuthority('HOST')")
+    @PreAuthorize("hasAuthority('report_review')")
     public ResponseEntity<ReviewReportResponseDto> createReviewReport(@RequestBody ReviewReportRequestDto dto) {
         Optional<ReviewReport> reviewReport = reviewReportDtoMapper.toReviewReport(dto);
         if (reviewReport.isEmpty()) {
@@ -65,12 +67,8 @@ public class ReviewReportController {
         }
     }
 
-    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ReviewReportResponseDto> updateReviewReport(@PathVariable Long id, @RequestBody ReviewReportRequestDto dto) {
-        return new ResponseEntity<>(null, HttpStatus.OK);
-    }
-
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('delete_report')")
     public ResponseEntity<Void> deleteReviewReport(@PathVariable Long id) {
         reviewReportService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
